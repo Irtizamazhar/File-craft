@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "protect-pdf",
+    "name": "Protect PDF",
+    "category": "PDF",
+    "description": "Encrypt a PDF using your chosen password.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "password",
+        "label": "New password",
+        "kind": "password",
+        "default": ""
+      }
+    ],
+    "notice": null,
+    "engine": "browser"
+  },
+  {
+    "slug": "unlock-pdf",
+    "name": "Unlock PDF",
+    "category": "PDF",
+    "description": "Decrypt a PDF with its correct owner-provided password.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "password",
+        "label": "Current password",
+        "kind": "password",
+        "default": ""
+      }
+    ],
+    "notice": null,
+    "engine": "browser"
+  },
+  {
+    "slug": "extract-pdf-images",
+    "name": "Extract PDF images",
+    "category": "PDF",
+    "description": "Extract embedded raster images into a ZIP.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null,
+    "engine": "browser"
+  },
+  {
+    "slug": "ocr-pdf",
+    "name": "OCR PDF",
+    "category": "PDF",
+    "description": "Make scanned PDF pages searchable using Tesseract OCR.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null,
+    "engine": "browser"
+  },
+  {
+    "slug": "pptx-to-pdf",
+    "name": "Slides to PDF",
+    "category": "PowerPoint",
+    "description": "Convert slides into a PDF using LibreOffice.",
+    "accept": ".pptx,.ppt",
+    "multi": false,
+    "controls": [],
+    "notice": null,
+    "engine": "browser"
+  },
+  {
+    "slug": "pptx-to-images",
+    "name": "Slides to PNG",
+    "category": "PowerPoint",
+    "description": "Render slides as PNG images inside a ZIP.",
+    "accept": ".pptx,.ppt",
+    "multi": false,
+    "controls": [],
+    "notice": null,
+    "engine": "browser"
+  }
+]

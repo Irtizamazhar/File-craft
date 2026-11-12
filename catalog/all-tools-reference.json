@@ -1,0 +1,660 @@
+[
+  {
+    "slug": "merge-pdf",
+    "name": "Merge PDF",
+    "category": "PDF",
+    "description": "Combine multiple PDFs into one ordered document.",
+    "accept": ".pdf",
+    "multi": true,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "split-pdf",
+    "name": "Split PDF",
+    "category": "PDF",
+    "description": "Save every page as a separate PDF in a ZIP.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "compress-pdf",
+    "name": "Compress PDF",
+    "category": "PDF",
+    "description": "Reduce file size using Ghostscript; result may vary.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "quality",
+        "label": "Compression",
+        "kind": "select",
+        "values": [
+          "screen",
+          "ebook",
+          "printer"
+        ],
+        "default": "ebook"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "rotate-pdf",
+    "name": "Rotate PDF",
+    "category": "PDF",
+    "description": "Rotate all pages by 90, 180 or 270 degrees.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "angle",
+        "label": "Rotation",
+        "kind": "select",
+        "values": [
+          "90",
+          "180",
+          "270"
+        ],
+        "default": "90"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "extract-pdf-pages",
+    "name": "Extract pages",
+    "category": "PDF",
+    "description": "Extract selected pages, e.g. 1,3-5.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "pages",
+        "label": "Pages (e.g. 1,3-5)",
+        "kind": "text",
+        "default": "1"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "delete-pdf-pages",
+    "name": "Delete pages",
+    "category": "PDF",
+    "description": "Remove selected pages without modifying the original file.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "pages",
+        "label": "Pages to delete",
+        "kind": "text",
+        "default": "1"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "add-page-numbers",
+    "name": "Page numbers",
+    "category": "PDF",
+    "description": "Stamp clear page numbers on each page.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "watermark-pdf",
+    "name": "Watermark PDF",
+    "category": "PDF",
+    "description": "Apply your text watermark across the document.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "text",
+        "label": "Watermark text",
+        "kind": "text",
+        "default": "CONFIDENTIAL"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "protect-pdf",
+    "name": "Protect PDF",
+    "category": "PDF",
+    "description": "Encrypt a PDF using your chosen password.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "password",
+        "label": "New password",
+        "kind": "password",
+        "default": ""
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "unlock-pdf",
+    "name": "Unlock PDF",
+    "category": "PDF",
+    "description": "Decrypt a PDF with its correct owner-provided password.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "password",
+        "label": "Current password",
+        "kind": "password",
+        "default": ""
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "crop-pdf",
+    "name": "Crop PDF",
+    "category": "PDF",
+    "description": "Trim margins from all pages, measured in points.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "margin",
+        "label": "Trim margin (points)",
+        "kind": "number",
+        "default": "18"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "grayscale-pdf",
+    "name": "Grayscale PDF",
+    "category": "PDF",
+    "description": "Convert pages to grayscale, producing a flattened PDF.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": "This process rasterizes pages; text selection may be lost."
+  },
+  {
+    "slug": "pdf-to-text",
+    "name": "PDF to TXT",
+    "category": "Convert",
+    "description": "Extract embedded text from a PDF.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "text-to-pdf",
+    "name": "TXT to PDF",
+    "category": "Convert",
+    "description": "Create a readable PDF from a plain text file.",
+    "accept": ".txt",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "pdf-to-jpg",
+    "name": "PDF to JPG",
+    "category": "Convert",
+    "description": "Render each page as a JPG in a ZIP.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "pdf-to-png",
+    "name": "PDF to PNG",
+    "category": "Convert",
+    "description": "Render each page as a PNG in a ZIP.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "jpg-to-pdf",
+    "name": "JPG to PDF",
+    "category": "Convert",
+    "description": "Combine JPG images into one PDF.",
+    "accept": ".jpg,.jpeg",
+    "multi": true,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "png-to-pdf",
+    "name": "PNG to PDF",
+    "category": "Convert",
+    "description": "Combine PNG images into one PDF.",
+    "accept": ".png",
+    "multi": true,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "pdf-to-word",
+    "name": "PDF to Word",
+    "category": "Convert",
+    "description": "Extract PDF text into an editable DOCX.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": "Text is editable, but complex layout may not be preserved."
+  },
+  {
+    "slug": "pdf-to-excel",
+    "name": "PDF to Excel",
+    "category": "Convert",
+    "description": "Extract detected tables into a real XLSX workbook.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": "Requires detectable tables; arbitrary PDF layouts are not spreadsheets."
+  },
+  {
+    "slug": "pdf-to-powerpoint",
+    "name": "PDF to PowerPoint",
+    "category": "Convert",
+    "description": "Convert each PDF page into an image-based PowerPoint slide.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": "Slides contain page images, not independently editable objects."
+  },
+  {
+    "slug": "repair-pdf",
+    "name": "Repair PDF",
+    "category": "PDF",
+    "description": "Attempt to rebuild a damaged but readable PDF.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "flatten-pdf",
+    "name": "Flatten PDF",
+    "category": "PDF",
+    "description": "Render PDF pages into a non-editable PDF.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": "This rasterizes page content and may increase file size."
+  },
+  {
+    "slug": "pdf-metadata",
+    "name": "Edit PDF metadata",
+    "category": "PDF",
+    "description": "Set title and author properties in a PDF.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "title",
+        "label": "Title",
+        "kind": "text",
+        "default": ""
+      },
+      {
+        "key": "author",
+        "label": "Author",
+        "kind": "text",
+        "default": ""
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "remove-blank-pages",
+    "name": "Remove blank pages",
+    "category": "PDF",
+    "description": "Remove pages without detectable text or graphics.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": "Automated blank-page detection is heuristic."
+  },
+  {
+    "slug": "add-blank-pages",
+    "name": "Add blank page",
+    "category": "PDF",
+    "description": "Append a blank page matching the last page size.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "compare-pdf",
+    "name": "Compare PDFs",
+    "category": "PDF",
+    "description": "Create a plain text difference report between two PDFs.",
+    "accept": ".pdf",
+    "multi": true,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "extract-pdf-images",
+    "name": "Extract PDF images",
+    "category": "PDF",
+    "description": "Extract embedded raster images into a ZIP.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "ocr-pdf",
+    "name": "OCR PDF",
+    "category": "PDF",
+    "description": "Make scanned PDF pages searchable using Tesseract OCR.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "fill-pdf-form",
+    "name": "Fill PDF form",
+    "category": "PDF",
+    "description": "Fill an existing PDF form field by its exact name.",
+    "accept": ".pdf",
+    "multi": false,
+    "controls": [
+      {
+        "key": "field",
+        "label": "Form field name",
+        "kind": "text",
+        "default": ""
+      },
+      {
+        "key": "value",
+        "label": "Field value",
+        "kind": "text",
+        "default": ""
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "docx-to-pdf",
+    "name": "Word to PDF",
+    "category": "Word",
+    "description": "Convert Word documents into PDF using LibreOffice.",
+    "accept": ".docx,.doc",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "docx-to-txt",
+    "name": "Word to TXT",
+    "category": "Word",
+    "description": "Extract the text content of a Word document.",
+    "accept": ".docx",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "txt-to-docx",
+    "name": "TXT to Word",
+    "category": "Word",
+    "description": "Convert a plain text file into an editable DOCX.",
+    "accept": ".txt",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "docx-to-html",
+    "name": "Word to HTML",
+    "category": "Word",
+    "description": "Convert text and basic paragraphs to HTML.",
+    "accept": ".docx",
+    "multi": false,
+    "controls": [],
+    "notice": "Complex tables and layout may not be preserved."
+  },
+  {
+    "slug": "html-to-docx",
+    "name": "HTML to Word",
+    "category": "Word",
+    "description": "Convert HTML text into an editable Word document.",
+    "accept": ".html,.htm",
+    "multi": false,
+    "controls": [],
+    "notice": "This conversion preserves text, not complex styling."
+  },
+  {
+    "slug": "merge-docx",
+    "name": "Merge Word files",
+    "category": "Word",
+    "description": "Combine document paragraphs in order.",
+    "accept": ".docx",
+    "multi": true,
+    "controls": [],
+    "notice": "Advanced headers, styles and embedded objects may not be preserved."
+  },
+  {
+    "slug": "xlsx-to-pdf",
+    "name": "Excel to PDF",
+    "category": "Excel",
+    "description": "Export spreadsheet pages to PDF using LibreOffice.",
+    "accept": ".xlsx,.xls",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "csv-to-xlsx",
+    "name": "CSV to Excel",
+    "category": "Excel",
+    "description": "Convert CSV data into a real spreadsheet.",
+    "accept": ".csv",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "xlsx-to-csv",
+    "name": "Excel to CSV",
+    "category": "Excel",
+    "description": "Export each worksheet into a separate CSV within a ZIP.",
+    "accept": ".xlsx",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "xlsx-to-html",
+    "name": "Excel to HTML",
+    "category": "Excel",
+    "description": "Export worksheet tables to an HTML file.",
+    "accept": ".xlsx",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "pptx-to-pdf",
+    "name": "Slides to PDF",
+    "category": "PowerPoint",
+    "description": "Convert slides into a PDF using LibreOffice.",
+    "accept": ".pptx,.ppt",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "pptx-to-images",
+    "name": "Slides to PNG",
+    "category": "PowerPoint",
+    "description": "Render slides as PNG images inside a ZIP.",
+    "accept": ".pptx,.ppt",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "pptx-to-txt",
+    "name": "Slides to TXT",
+    "category": "PowerPoint",
+    "description": "Extract slide text into a TXT file.",
+    "accept": ".pptx",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "images-to-pptx",
+    "name": "Images to slides",
+    "category": "PowerPoint",
+    "description": "Create one slide per uploaded image.",
+    "accept": ".jpg,.jpeg,.png,.webp",
+    "multi": true,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "jpg-to-png",
+    "name": "JPG to PNG",
+    "category": "Image",
+    "description": "Convert a JPG image to PNG.",
+    "accept": ".jpg,.jpeg",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "png-to-jpg",
+    "name": "PNG to JPG",
+    "category": "Image",
+    "description": "Convert PNG to JPG with a white transparent background.",
+    "accept": ".png",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "webp-to-jpg",
+    "name": "WEBP to JPG",
+    "category": "Image",
+    "description": "Convert a WEBP image to JPG.",
+    "accept": ".webp",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "jpg-to-webp",
+    "name": "JPG to WEBP",
+    "category": "Image",
+    "description": "Convert JPG images to WEBP.",
+    "accept": ".jpg,.jpeg",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "png-to-webp",
+    "name": "PNG to WEBP",
+    "category": "Image",
+    "description": "Convert PNG images to WEBP.",
+    "accept": ".png",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "resize-image",
+    "name": "Resize image",
+    "category": "Image",
+    "description": "Resize while preserving image proportions.",
+    "accept": ".jpg,.jpeg,.png,.webp",
+    "multi": false,
+    "controls": [
+      {
+        "key": "width",
+        "label": "Maximum width (px)",
+        "kind": "number",
+        "default": "1200"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "rotate-image",
+    "name": "Rotate image",
+    "category": "Image",
+    "description": "Rotate images using your chosen angle.",
+    "accept": ".jpg,.jpeg,.png,.webp",
+    "multi": false,
+    "controls": [
+      {
+        "key": "angle",
+        "label": "Rotation angle",
+        "kind": "select",
+        "values": [
+          "90",
+          "180",
+          "270"
+        ],
+        "default": "90"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "compress-image",
+    "name": "Compress image",
+    "category": "Image",
+    "description": "Re-encode an image as optimized JPG.",
+    "accept": ".jpg,.jpeg,.png,.webp",
+    "multi": false,
+    "controls": [
+      {
+        "key": "quality",
+        "label": "JPEG quality (1-95)",
+        "kind": "number",
+        "default": "75"
+      }
+    ],
+    "notice": null
+  },
+  {
+    "slug": "strip-image-metadata",
+    "name": "Remove image metadata",
+    "category": "Image",
+    "description": "Save a fresh image without EXIF metadata.",
+    "accept": ".jpg,.jpeg,.png,.webp",
+    "multi": false,
+    "controls": [],
+    "notice": null
+  },
+  {
+    "slug": "image-to-pdf",
+    "name": "Images to PDF",
+    "category": "Image",
+    "description": "Combine mixed supported images into one PDF.",
+    "accept": ".jpg,.jpeg,.png,.webp",
+    "multi": true,
+    "controls": [],
+    "notice": null
+  }
+]

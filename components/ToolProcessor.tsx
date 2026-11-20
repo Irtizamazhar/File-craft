@@ -1,61 +1,35 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {ArrowRight,ArrowUp,ArrowDown,CheckCircle2,CloudUpload,Download,File,Loader2,LockKeyhole,ShieldCheck,TriangleAlert,X} from 'lucide-react';
-import {processFile,type ProcessedFile} from '@/lib/browser-engine';
+import Image from 'next/image';
+import {ArrowRight,ArrowUp,ArrowDown,CheckCircle2,CloudUpload,Download,File as FileIcon,Loader2,LockKeyhole,ShieldCheck,TriangleAlert,X,RotateCcw} from 'lucide-react';
+import {processFile,validateInput,type ProcessedFile} from '@/lib/browser-engine';
+import {takeFiles} from '@/lib/file-handoff';
 import type {Tool} from '@/lib/tools';
 type Result={name:string;size:number;url:string};
-const niceSize=(n:number)=>n>=1024*1024?(n/1048576).toFixed(2)+' MB':(n/1024).toFixed(1)+' KB';
+const niceSize=(n:number)=>n>=1048576?(n/1048576).toFixed(2)+' MB':(n/1024).toFixed(1)+' KB';
+function Preview({file}:{file:File}){const[url,setUrl]=useState('');useEffect(()=>{if(!/^image\//.test(file.type))return;const value=URL.createObjectURL(file);setUrl(value);return()=>URL.revokeObjectURL(value)},[file]);return url?<Image unoptimized className="image-preview" src={url} width={45} height={45} alt={'Preview of '+file.name}/>:<span className="selected-file-icon"><FileIcon size={21}/></span>}
 export default function ToolProcessor({tool}:{tool:Tool}){
- const input=useRef<HTMLInputElement>(null);
- const resultsRef=useRef<string[]>([]);
- const [files,setFiles]=useState<File[]>([]);
- const [options,setOptions]=useState<Record<string,string>>(()=>Object.fromEntries(tool.controls.map(c=>[c.key,c.default])));
- const [drag,setDrag]=useState(false),[busy,setBusy]=useState(false);
- const [results,setResults]=useState<Result[]>([]),[error,setError]=useState('');
- const resetResults=()=>{resultsRef.current.forEach(u=>URL.revokeObjectURL(u));resultsRef.current=[];setResults([])};
- useEffect(()=>()=>{resultsRef.current.forEach(u=>URL.revokeObjectURL(u))},[]);
- const selectFiles=(received:FileList|null)=>{
-  if(!received||busy)return;
-  const allowed=tool.accept.toLowerCase().split(',').map(s=>s.trim());
-  const current=tool.multi?[...files,...Array.from(received)]:Array.from(received).slice(0,1);
-  if(current.length>12)return setError('Select 12 files or fewer.');
-  if(current.some(f=>!allowed.includes('.'+f.name.split('.').pop()?.toLowerCase())))return setError('Unsupported file extension. Please select one of the listed formats.');
-  if(current.some(f=>!f.size||f.size>15*1048576))return setError('Each file must be nonempty and at most 15 MB.');
-  if(current.reduce((sum,f)=>sum+f.size,0)>45*1048576)return setError('Combined file size must be 45 MB or less.');
-  resetResults();setFiles(current);setError('');
- };
- const moveFile=(index:number,shift:number)=>setFiles(prev=>{const next=[...prev],target=index+shift;if(target<0||target>=next.length)return prev;[next[index],next[target]]=[next[target],next[index]];return next});
- async function process(){
-  if(!files.length)return setError('Choose a file first.');
-  if(['merge-pdf','merge-docx','compare-pdf'].includes(tool.slug)&&files.length<2)return setError('Select at least two files.');
-  setBusy(true);setError('');resetResults();
-  try{
-   // Operations run in the current browser tab; source files are not transmitted to the website.
-   const outputs:ProcessedFile[]=await processFile(tool.slug,files,options);
-   if(!outputs.length)throw new Error('No result was produced.');
-   const items=outputs.map(x=>({name:x.name,size:x.blob.size,url:URL.createObjectURL(x.blob)}));
-   resultsRef.current=items.map(x=>x.url);setResults(items);
-   // Optional metadata-only user history. Files and passwords are never sent.
-   fetch('/api/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:tool.slug,status:'completed'})}).catch(()=>{});
-  }catch(e){setError(e instanceof Error?e.message:'This file could not be processed.');}
-  finally{setBusy(false)}
- }
- return <div className="processor-card">
-  <div className="processor-header"><div><span className="processor-index">PRIVATE BROWSER WORKSPACE</span><h2>Ready when you are.</h2><p>Process your files on your device.</p></div><span className="processor-lock"><LockKeyhole size={18}/></span></div>
-  <div className={'tool-drop '+(drag?'dragging':'')} onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);selectFiles(e.dataTransfer.files)}}>
-   <span className="tool-drop-icon"><CloudUpload size={30}/></span><strong>Drag & drop your {tool.multi?'files':'file'} here</strong><p>Or select files from your device</p>
-   <button type="button" className="btn btn-primary" disabled={busy} onClick={()=>input.current?.click()}>Choose {tool.multi?'files':'file'} <ArrowRight size={16}/></button>
-   <small>Maximum 15 MB per file, 45 MB per task, 12 files</small>
-   <input ref={input} hidden type="file" accept={tool.accept} multiple={tool.multi} onChange={e=>{selectFiles(e.target.files);e.target.value=''}}/>
-  </div>
-  {files.length>0&&<div className="selected-files"><div className="panel-label"><span>SELECTED FILES ({files.length})</span><button type="button" disabled={busy} onClick={()=>{setFiles([]);resetResults()}}>Clear all</button></div>
-   {files.map((file,i)=><div className="selected-file" key={`${i}-${file.name}`}><span className="selected-file-icon"><File size={19}/></span><div><strong>{file.name}</strong><small>{niceSize(file.size)}</small></div>{tool.multi&&files.length>1&&<div className="file-order-buttons"><button type="button" aria-label={'Move '+file.name+' up'} disabled={busy||i===0} onClick={()=>moveFile(i,-1)}><ArrowUp size={16}/></button><button type="button" aria-label={'Move '+file.name+' down'} disabled={busy||i===files.length-1} onClick={()=>moveFile(i,1)}><ArrowDown size={16}/></button></div>}<button type="button" aria-label={'Remove '+file.name} disabled={busy} onClick={()=>{setFiles(prev=>prev.filter((_,index)=>index!==i));resetResults()}}><X size={17}/></button></div>)}
-  </div>}
-  {tool.controls.length>0&&<div className="tool-options"><div className="panel-label">OPTIONS</div><div className="options-grid">{tool.controls.map(control=><label key={control.key} className="option-field"><span>{control.label}</span>{control.kind==='select'?<select value={options[control.key]||''} disabled={busy} onChange={e=>setOptions({...options,[control.key]:e.target.value})}>{control.values?.map(v=><option key={v} value={v}>{v}</option>)}</select>:<input type={control.kind==='number'?'number':control.kind==='password'?'password':'text'} autoComplete="off" value={options[control.key]||''} disabled={busy} onChange={e=>setOptions({...options,[control.key]:e.target.value})}/>}</label>)}</div></div>}
-  {tool.notice&&<p className="tool-notice"><TriangleAlert size={16}/>{tool.notice}</p>}
-  {error&&<div className="error-box" role="alert"><TriangleAlert size={18}/><span>{error}</span></div>}
-  {results.length>0&&<div className="results-box" role="status"><div className="results-intro"><CheckCircle2 size={23}/><div><strong>{results.length===1?'Your file is ready':'Your files are ready'}</strong><p>Review the downloaded file before using it for important work.</p></div></div>{results.map(r=><a key={r.url} className="btn btn-primary" href={r.url} download={r.name}><Download size={17}/>{r.name} ({niceSize(r.size)})</a>)}</div>}
-  <button type="button" className="btn btn-dark process-button" onClick={process} disabled={busy||!files.length}>{busy?<><Loader2 size={18} className="spin"/> Processing on your device...</>:<>Process {files.length||''} {files.length===1?'file':'files'} <ArrowRight size={18}/></>}</button>
-  <div className="tool-safety"><ShieldCheck size={16}/> Your document contents stay in your browser. Closing this tab discards the generated download link.</div>
- </div>
+ const input=useRef<HTMLInputElement>(null),urls=useRef<string[]>([]),running=useRef(false),selection=useRef(0);
+ const[files,setFiles]=useState<File[]>([]),[options,setOptions]=useState<Record<string,string>>(()=>Object.fromEntries(tool.controls.map(c=>[c.key,c.default]))),[outputName,setOutputName]=useState('');
+ const[drag,setDrag]=useState(false),[busy,setBusy]=useState(false),[checking,setChecking]=useState(false),[results,setResults]=useState<Result[]>([]),[error,setError]=useState('');
+ const resetResults=()=>{urls.current.forEach(u=>URL.revokeObjectURL(u));urls.current=[];setResults([])};
+ useEffect(()=>{const incoming=takeFiles(tool.slug);if(incoming.length)setFiles(incoming);return()=>{urls.current.forEach(u=>URL.revokeObjectURL(u))}},[tool.slug]);
+ async function select(received:FileList|null){if(!received?.length||running.current)return;const id=++selection.current;setChecking(true);setError('');try{
+ const added=Array.from(received),current=tool.multi?[...files,...added]:added.slice(0,1),allowed=tool.accept.split(',');
+ if(current.length>12)throw Error('Select 12 files or fewer.');
+ if(current.some(f=>!allowed.includes('.'+f.name.split('.').pop()?.toLowerCase())))throw Error('Choose a supported format: '+tool.accept);
+ if(current.some(f=>!f.size||f.size>15*1048576)||current.reduce((n,f)=>n+f.size,0)>45*1048576)throw Error('Use nonempty files up to 15 MB each and 45 MB in total.');
+ for(const file of added.slice(0,tool.multi?undefined:1))await validateInput(file);
+ if(id===selection.current){resetResults();setFiles(current)}
+ }catch(e){if(id===selection.current)setError((e as Error).message)}finally{if(id===selection.current)setChecking(false)}}
+ function move(index:number,shift:number){resetResults();setFiles(prev=>{const next=[...prev],target=index+shift;if(target<0||target>=next.length)return prev;[next[index],next[target]]=[next[target],next[index]];return next})}
+ function reset(){selection.current++;setChecking(false);setFiles([]);setError('');setOutputName('');resetResults();input.current?.focus()}
+ async function process(){if(running.current||checking)return;if(!files.length)return setError('Choose a file first.');if(['merge-pdf','merge-docx','compare-pdf'].includes(tool.slug)&&files.length<2)return setError('Select at least two files.');running.current=true;setBusy(true);setError('');resetResults();try{
+ const outputs:ProcessedFile[]=await processFile(tool.slug,files,options);if(!outputs.length||outputs.some(x=>!x.blob.size))throw Error('No usable output was produced.');
+ const cleaned=outputName.trim().replace(/[^a-zA-Z0-9_.-]/g,'_').replace(/\.[^.]+$/,'').slice(0,75);
+ const items=outputs.map(x=>({name:cleaned&&outputs.length===1?cleaned+'.'+x.name.split('.').pop():x.name,size:x.blob.size,url:URL.createObjectURL(x.blob)}));urls.current=items.map(x=>x.url);setResults(items);
+ void fetch('/api/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:tool.slug,status:'completed'})}).catch(()=>{});
+ }catch(e){setError(e instanceof Error?e.message:'This file could not be processed.')}finally{running.current=false;setBusy(false)}}
+ const disabled=busy||checking,inputSize=files.reduce((n,f)=>n+f.size,0),outputSize=results.reduce((n,f)=>n+f.size,0);
+ return <div className="processor-card" aria-busy={disabled}><div className="processor-header"><div><span className="processor-index">YOUR ON-DEVICE WORKSPACE</span><h2>Let’s make it happen.</h2><p>Your files. A few simple steps.</p></div><span className="processor-lock"><LockKeyhole size={19}/></span></div><div className="workspace-grid"><div className="workspace-files"><div className={'tool-drop '+(drag?'dragging':'')} onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);void select(e.dataTransfer.files)}}><CloudUpload className="hero-upload-icon" size={45}/><strong>Drop your {tool.multi?'files':'file'} here</strong><p>{tool.accept.replaceAll(',',', ')}</p><button className="btn btn-primary" disabled={disabled} onClick={()=>input.current?.click()}>{files.length&&tool.multi?'Add more files':'Choose '+(tool.multi?'files':'file')}<ArrowRight size={16}/></button><small>15 MB per file · 45 MB per task · up to 12 files</small><input ref={input} hidden type="file" accept={tool.accept} multiple={tool.multi} onChange={e=>{void select(e.target.files);e.target.value=''}}/></div>{checking&&<p role="status"><Loader2 size={16} className="spin"/> Checking file contents…</p>}{files.length>0&&<div className="selected-files"><div className="panel-label"><span>YOUR FILES ({files.length})</span><button disabled={disabled} onClick={reset}>Clear all</button></div>{files.map((file,i)=><div className="selected-file" key={i+'-'+file.name}><Preview file={file}/><div><strong>{file.name}</strong><small>{niceSize(file.size)}</small></div>{tool.multi&&files.length>1&&<div className="file-order-buttons"><button aria-label={'Move '+file.name+' up'} disabled={disabled||i===0} onClick={()=>move(i,-1)}><ArrowUp size={16}/></button><button aria-label={'Move '+file.name+' down'} disabled={disabled||i===files.length-1} onClick={()=>move(i,1)}><ArrowDown size={16}/></button></div>}<button aria-label={'Remove '+file.name} disabled={disabled} onClick={()=>{setFiles(prev=>prev.filter((_,n)=>n!==i));resetResults()}}><X size={18}/></button></div>)}</div>}</div><aside className="workspace-options" aria-label="Processing settings"><h3>Make it yours</h3>{tool.controls.map(c=><label key={c.key} className="option-field"><span>{c.label}</span>{c.kind==='select'?<select disabled={disabled} value={options[c.key]} onChange={e=>{resetResults();setOptions({...options,[c.key]:e.target.value})}}>{c.values?.map(v=><option key={v}>{v}</option>)}</select>:<input type={c.kind==='number'?'number':c.kind==='password'?'password':'text'} autoComplete="off" disabled={disabled} value={options[c.key]} onChange={e=>{resetResults();setOptions({...options,[c.key]:e.target.value})}}/>}</label>)}<label className="option-field output-label"><span>Output filename (optional)</span><input maxLength={75} disabled={disabled} placeholder="Let FileCraft name it" value={outputName} onChange={e=>{resetResults();setOutputName(e.target.value)}}/></label><p className="option-help">The correct output extension is added automatically. Multiple outputs keep their generated names.</p><button className="btn btn-primary process-button" onClick={process} disabled={disabled||!files.length}>{busy?<><Loader2 className="spin" size={18}/> Processing…</>:<>Process {files.length||''} {files.length===1?'file':'files'}<ArrowRight size={16}/></>}</button>{busy&&<p role="status" className="option-help">Processing on your device. Large files may take longer. Keep this tab open.</p>}</aside></div>{tool.notice&&<p className="tool-notice"><TriangleAlert size={18}/>{tool.notice}</p>}{error&&<div role="alert" className="error-box"><TriangleAlert size={19}/><span>{error} Adjust the input or options and try again.</span></div>}{results.length>0&&<div className="results-box" role="status"><div className="results-intro"><CheckCircle2 size={25}/><div><strong>Your {results.length===1?'file is':'files are'} ready.</strong><p>Download and review the result before sharing.</p></div></div><p className="result-meta">Input: {niceSize(inputSize)} ? Output: {niceSize(outputSize)}{tool.slug==='compress-pdf'&&outputSize<inputSize?' ? '+Math.round((1-outputSize/inputSize)*100)+'% smaller':''}</p>{results.map(r=><a className="btn btn-primary" key={r.url} href={r.url} download={r.name}><Download size={17}/>{r.name} ({niceSize(r.size)})</a>)}<button className="btn btn-outline processor-reset" disabled={busy} onClick={reset}><RotateCcw size={16}/> Process another file</button></div>}<div className="tool-safety"><ShieldCheck size={16}/> Document contents stay in your browser. Save your download before leaving this page.</div></div>
 }

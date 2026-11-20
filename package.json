@@ -8,33 +8,48 @@
   },
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "node scripts/copy-worker.mjs && next build",
+    "build": "node scripts/copy-worker.mjs && node scripts/copy-advanced-engines.mjs && next build",
     "start": "next start -p 3000 -H 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "postinstall": "node scripts/copy-worker.mjs",
+    "postinstall": "node scripts/copy-worker.mjs && node scripts/copy-advanced-engines.mjs",
     "db:init": "node scripts/init-db.mjs",
     "check:source": "node scripts/check-source.mjs",
     "test": "node --test tests/*.test.mjs",
-    "smoke": "node scripts/smoke-hostinger.mjs"
+    "smoke": "node scripts/smoke-hostinger.mjs",
+    "lint": "eslint app components lib --ext .ts,.tsx",
+    "test:browser": "playwright test",
+    "db:verify": "node scripts/verify-db.mjs",
+    "test:auth": "node scripts/test-auth.mjs",
+    "test:browser:chromium": "playwright test --project=chromium --project=mobile-chromium",
+    "setup:object-model": "node scripts/setup-object-model.mjs"
   },
   "dependencies": {
-    "next": "14.2.35",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
+    "@embedpdf/pdfium": "^2.15.1",
+    "docx": "9.5.1",
+    "exceljs": "4.4.0",
+    "jszip": "3.10.1",
     "lucide-react": "0.468.0",
+    "mammoth": "^1.13.0",
+    "mysql2": "^3.24.6",
+    "next": "^15.5.29",
+    "onnxruntime-web": "^1.31.1",
     "pdf-lib": "1.17.1",
     "pdfjs-dist": "4.10.38",
-    "jszip": "3.10.1",
-    "docx": "9.5.1",
-    "mammoth": "1.9.0",
-    "exceljs": "4.4.0",
     "pptxgenjs": "3.12.0",
-    "mysql2": "3.12.0"
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.0",
     "@types/node": "22.10.2",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.5.29",
     "typescript": "5.8.3"
+  },
+  "overrides": {
+    "postcss": "^8.5.23"
   }
 }

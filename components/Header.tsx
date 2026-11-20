@@ -1,22 +1,13 @@
 'use client';
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {useState} from 'react';
-import { Menu, X, ChevronDown, ArrowUpRight } from 'lucide-react';
+import {useEffect,useRef,useState} from 'react';
+import {Menu,X,ChevronDown,ArrowRight} from 'lucide-react';
 import Brand from './Brand';
+const menus=[{label:'All tools',links:[['All tools','/tools'],['Word & documents','/document-tools'],['Images','/image-tools']]},{label:'PDF tools',links:[['Merge PDF','/tools/merge-pdf'],['Compress PDF','/tools/compress-pdf'],['Split PDF','/tools/split-pdf'],['Edit PDF','/edit-pdf'],['File Compressor','/file-compressor'],['All PDF tools','/pdf-tools']]},{label:'Convert',links:[['PDF to Word','/tools/pdf-to-word'],['Images to PDF','/tools/image-to-pdf'],['Word to PDF','/tools/docx-to-pdf'],['All conversions','/convert-tools']]}];
 export default function Header(){
- const [open,setOpen]=useState(false);const pathname=usePathname();
- return <header className="site-header"><div className="container header-inner">
-  <Brand/>
-  <nav className={'site-nav '+(open?'open':'')} aria-label="Main navigation">
-    <Link onClick={()=>setOpen(false)} className={pathname.startsWith('/tools')?'current':''} href="/tools">All tools</Link>
-    <Link onClick={()=>setOpen(false)} href="/pdf-tools">PDF tools</Link>
-    <Link onClick={()=>setOpen(false)} href="/document-tools">Document tools</Link>
-    <Link onClick={()=>setOpen(false)} href="/blog">Guides</Link><Link onClick={()=>setOpen(false)} href="/pricing">Pricing</Link>
-    <Link onClick={()=>setOpen(false)} href="/security">Security</Link>
-    <div className="mobile-auth"><Link href="/login">Log in</Link><Link href="/register" className="btn btn-primary">Get started <ArrowUpRight size={16}/></Link></div>
-  </nav>
-  <div className="nav-actions"><Link href="/login" className="nav-login">Log in</Link><Link href="/dashboard" className="btn btn-primary btn-nav">My workspace <ArrowUpRight size={15}/></Link></div>
-  <button className="mobile-menu" type="button" aria-label="Toggle menu" aria-expanded={open} onClick={()=>setOpen(!open)}>{open?<X size={22}/>:<Menu size={22}/>}</button>
- </div></header>
+ const [open,setOpen]=useState(false),[menu,setMenu]=useState<string|null>(null);const pathname=usePathname();const root=useRef<HTMLElement>(null);
+ useEffect(()=>{setOpen(false);setMenu(null)},[pathname]);
+ useEffect(()=>{const close=(e:PointerEvent)=>{if(!root.current?.contains(e.target as Node)){setMenu(null);setOpen(false)}};document.addEventListener('pointerdown',close);return()=>document.removeEventListener('pointerdown',close)},[]);
+ return <>{pathname==='/tools'&&<div className="directory-announcement">Your documents, simplified</div>}<header className={'site-header '+(pathname==='/tools'?'directory-header':'')} ref={root} onKeyDown={e=>{if(e.key==='Escape'){const dropdown=(e.target as HTMLElement).closest('.nav-dropdown');const toggle=dropdown?.querySelector('button');setMenu(null);if(toggle)toggle.focus();else{setOpen(false);root.current?.querySelector<HTMLButtonElement>('.mobile-menu')?.focus()}}}}><div className="container header-inner"><Brand/><nav id="main-navigation" className={'site-nav '+(open?'open':'')} aria-label="Main navigation">{menus.map(item=><div className="nav-dropdown" key={item.label}><button type="button" aria-expanded={menu===item.label} aria-controls={'menu-'+item.label.replaceAll(' ','-')} onClick={()=>setMenu(menu===item.label?null:item.label)}>{item.label}<ChevronDown size={15}/></button><div id={'menu-'+item.label.replaceAll(' ','-')} className="nav-dropdown-panel" hidden={menu!==item.label}>{item.links.map(([label,href])=><Link key={href} href={href} onClick={()=>{setMenu(null);setOpen(false)}}>{label}<ArrowRight size={14}/></Link>)}</div></div>)}<Link className={pathname==='/features'?'current':''} href="/features">Features</Link><Link className={pathname==='/pricing'?'current':''} href="/pricing">Pricing</Link><div className="mobile-auth"><Link href="/login">Log in</Link><Link href="/register" className="btn btn-primary">Get started</Link></div></nav><div className="nav-actions"><Link href="/login" className="nav-login">Log in</Link><Link href="/register" className="btn btn-primary btn-nav">Get started</Link></div><button className="mobile-menu" type="button" aria-label={open?'Close navigation':'Open navigation'} aria-expanded={open} aria-controls="main-navigation" onClick={()=>setOpen(!open)}>{open?<X/>:<Menu/>}</button></div></header></>
 }

@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './design-system.css';
+import './advanced.css';
 import Header from '@/components/Header';
+import ContentAds from '@/components/ContentAds';
 import Footer from '@/components/Footer';
-import {adsensePublisher, googleVerification, sitePublic, siteUrl} from '@/lib/site';
+import MobileToolsNav from '@/components/MobileToolsNav';
+import {adsEnabled, adsensePublisher, googleVerification, sitePublic, siteUrl} from '@/lib/site';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -16,7 +20,7 @@ export const metadata: Metadata = {
 };
 export default function RootLayout({children}:{children:React.ReactNode}) {
   return <html lang="en"><head>
-    {adsensePublisher ? <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsensePublisher}`} crossOrigin="anonymous"/> : null}
+
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'WebSite',name:'FileCraft',url:siteUrl,description:'Online file conversion and document tools'}).replace(/</g,'\\u003c')}}/>
-  </head><body><Header/><main>{children}</main><Footer/></body></html>
+  </head><body><ContentAds enabled={adsEnabled} publisher={adsensePublisher}/><Header/><a className="skip-link" href="#main-content">Skip to content</a><main id="main-content">{children}</main><Footer/><MobileToolsNav/></body></html>
 }

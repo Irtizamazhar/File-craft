@@ -37,3 +37,28 @@ CREATE TABLE IF NOT EXISTS contact_messages (
  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
  INDEX idx_contact_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Plans describe configured capabilities. Paid plans are disabled until payments exist.
+CREATE TABLE IF NOT EXISTS subscription_plans (
+ id VARCHAR(20) PRIMARY KEY,
+ name VARCHAR(40) NOT NULL,
+ enabled TINYINT(1) NOT NULL DEFAULT 0,
+ max_file_bytes INT UNSIGNED NOT NULL,
+ max_task_bytes INT UNSIGNED NOT NULL,
+ max_files SMALLINT UNSIGNED NOT NULL,
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+INSERT IGNORE INTO subscription_plans (id,name,enabled,max_file_bytes,max_task_bytes,max_files) VALUES
+ ('free','Free',1,15728640,47185920,12),
+ ('pro','Pro',0,15728640,47185920,12),
+ ('business','Business',0,15728640,47185920,12);
+CREATE TABLE IF NOT EXISTS subscriptions (
+ user_id CHAR(36) PRIMARY KEY,
+ plan_id VARCHAR(20) NOT NULL DEFAULT 'free',
+ status ENUM('active','cancelled','expired') NOT NULL DEFAULT 'active',
+ created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ INDEX idx_subscriptions_plan (plan_id,status),
+ CONSTRAINT fk_subscription_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+ CONSTRAINT fk_subscription_plan FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

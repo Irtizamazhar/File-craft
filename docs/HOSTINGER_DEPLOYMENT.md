@@ -45,3 +45,12 @@ Percent-encode special characters in the password for a URL. If you prefer direc
 ## 5. Constraints
 
 Large PDFs/PowerPoint presentations can exceed browser memory. The selected tools enforce 15 MB per file and 45 MB total; rasterized PDF operations cap at 30 pages. The conversion quality of Office documents is basic, not equivalent to professional desktop document rendering.
+
+## Verification update ? 13 November 2026
+Local connectivity/auth integration passed; target hosting and HTTPS have not been tested. Run db:init again for the two new plan tables (non-destructive).
+
+Current official references: https://www.hostinger.com/support/how-to-deploy-a-nodejs-website-in-hostinger/ and https://www.hostinger.com/support/hostinger-node-js-limits-for-web-and-cloud-plans/ . These document eligible Business/Unlimited/Cloud plans, 120-second requests and no always-running workers/inbound WebSockets. Confirm your exact hPanel plan entitlement; storage size is insufficient evidence.
+
+Keep advertising flags false until CMP/approval verification. Set production public domain before building. Use the database host supplied by hPanel rather than assuming localhost. Never upload .env.local, .git, test artifacts or node_modules in a source ZIP.
+
+Production builds use .next-production; development uses .next. This prevents a running dev server from overwriting production route manifests. Deploy source and build on the host; preserve the configured output directory if packaging an existing build.

@@ -1,3 +1,4 @@
+export const dynamicParams=false;
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
@@ -5,10 +6,10 @@ import {getGuide,guides} from '@/lib/guides';
 import {getTool} from '@/lib/tools';
 import {siteUrl} from '@/lib/site';
 export function generateStaticParams(){return guides.map(g=>({slug:g.slug}))}
-export function generateMetadata({params}:{params:{slug:string}}):Metadata {
+export async function generateMetadata({params:pendingParams}:{params:Promise<{slug:string}>}):Promise<Metadata> {const params=await pendingParams;
  const guide=getGuide(params.slug);return guide?{title:guide.title,description:guide.description,alternates:{canonical:`/guides/${guide.slug}`},openGraph:{title:guide.title,description:guide.description,url:`${siteUrl}/guides/${guide.slug}`,type:'article'}}:{title:'Guide not found'};
 }
-export default function GuidePage({params}:{params:{slug:string}}){
+export default async function GuidePage({params:pendingParams}:{params:Promise<{slug:string}>}){const params=await pendingParams;
  const guide=getGuide(params.slug);if(!guide)notFound();
  const data={'@context':'https://schema.org','@type':'Article',headline:guide.title,dateModified:guide.updated,datePublished:guide.updated,author:{'@type':'Organization',name:'FileCraft'},publisher:{'@type':'Organization',name:'FileCraft'},mainEntityOfPage:`${siteUrl}/guides/${guide.slug}`};
  return <><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(data).replace(/</g,'\\u003c')}}/>

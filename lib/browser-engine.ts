@@ -22,12 +22,12 @@ function parsePages(raw:string|undefined,total:number):number[]{
   ensure(selected.length>0,'No pages selected.');return selected;
 }
 async function pdfLib(){return import('pdf-lib')}
-async function loadPdf(file:File){const {PDFDocument}=await pdfLib();try{return await PDFDocument.load(await bytesOf(file))}catch{fail('Could not open this PDF. It may be encrypted, damaged, or unsupported.')}}
+async function loadPdf(file:File){const {PDFDocument}=await pdfLib();let doc;try{doc=await PDFDocument.load(await bytesOf(file))}catch{fail('Could not open this PDF. It may be encrypted, damaged, or unsupported.')}ensure(doc.getPageCount()<=500,'Page editing supports up to 500 pages per PDF. Split larger documents first.');return doc}
 async function pdfOut(doc:any,name:string):Promise<ProcessedFile>{return {name,blob:asBlob(await doc.save({useObjectStreams:true}),'application/pdf')}}
-async function fileZip(items:ProcessedFile[],name:string):Promise<ProcessedFile>{const {default:JSZip}=await import('jszip');const zip=new JSZip();items.forEach((x,i)=>zip.file(String(i+1).padStart(2,'0')+'-'+x.name,x.blob));return {name,blob:await zip.generateAsync({type:'blob',compression:'DEFLATE'})}}
-async function pdfJs(file:File){const pdfjs=await import('pdfjs-dist');pdfjs.GlobalWorkerOptions.workerSrc='/pdf.worker.min.mjs';const doc=await pdfjs.getDocument({data:await bytesOf(file),useSystemFonts:true}).promise;ensure(doc.numPages<=250,'For large PDFs, split into smaller files first (maximum 250 pages).');return doc}
+async function fileZip(items:ProcessedFile[],name:string):Promise<ProcessedFile>{const {default:JSZip}=await import('jszip');const zip=new JSZip();for(const [i,x] of items.entries())zip.file(String(i+1).padStart(2,'0')+'-'+x.name,await x.blob.arrayBuffer());return {name,blob:await zip.generateAsync({type:'blob',compression:'DEFLATE'})}}
+async function pdfJs(file:File){const pdfjs=await import('pdfjs-dist');pdfjs.GlobalWorkerOptions.workerSrc='/pdf.worker.min.mjs';const doc=await pdfjs.getDocument({data:await bytesOf(file),useSystemFonts:true}).promise;if(doc.numPages>250){await doc.destroy();fail('For large PDFs, split into smaller files first (maximum 250 pages).')}return doc}
 async function pageText(doc:any,pageNo:number):Promise<string>{const page=await doc.getPage(pageNo);const content=await page.getTextContent();const byLine=new Map<number,{x:number;s:string}[]>();for(const item of content.items as any[]){if(typeof item.str!=='string')continue;const y=Math.round(item.transform?.[5]||0);const arr=byLine.get(y)||[];arr.push({x:item.transform?.[4]||0,s:item.str});byLine.set(y,arr)}return [...byLine.entries()].sort((a,b)=>b[0]-a[0]).map(([,line])=>line.sort((a,b)=>a.x-b.x).map(t=>t.s).join(' ')).join('\n')}
-async function allText(file:File):Promise<string>{const doc=await pdfJs(file);const out:string[]=[];for(let i=1;i<=doc.numPages;i++)out.push(await pageText(doc,i));return out.join('\n\n')} 
+async function allText(file:File):Promise<string>{const doc=await pdfJs(file);try{const out:string[]=[];for(let i=1;i<=doc.numPages;i++)out.push(await pageText(doc,i));return out.join('\n\n')}finally{await doc.destroy()}}
 async function render(doc:any,pageNo:number,scale=1.4):Promise<HTMLCanvasElement>{const page=await doc.getPage(pageNo);const viewport=page.getViewport({scale});ensure(viewport.width*viewport.height<=14_000_000,'This page is too large to render safely.');const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);const ctx=canvas.getContext('2d',{willReadFrequently:true});ensure(ctx,'Unable to create image canvas.');await page.render({canvasContext:ctx,canvas,viewport,background:'rgb(255,255,255)'} as any).promise;return canvas}
 const canvasBlob=(canvas:HTMLCanvasElement,mime:string,quality=0.86)=>new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Image export failed.')),mime,quality));
 async function fileCanvas(file:File):Promise<HTMLCanvasElement>{const image=await createImageBitmap(file);try{ensure(image.width*image.height<25_000_000,'Image dimensions exceed the safe limit.');const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d');ensure(ctx,'Canvas unavailable');ctx.drawImage(image,0,0);return canvas}finally{image.close()}}
@@ -38,7 +38,19 @@ async function drawTextPdf(text:string,filename:string):Promise<ProcessedFile>{c
 async function createDocx(text:string,name:string):Promise<ProcessedFile>{const d=await import('docx');const lines=text.replace(/\r/g,'').split('\n');ensure(lines.length<=20000,'Document is too long for browser conversion.');const paras=lines.map(line=>new d.Paragraph({children:[new d.TextRun(line||' ')]}));const document=new d.Document({sections:[{properties:{},children:paras}]});const blob=await d.Packer.toBlob(document);return {name,blob}}
 async function mammothAPI(){const mod:any=await import('mammoth/mammoth.browser');return mod.default||mod}
 async function docxText(file:File){const mammoth=await mammothAPI();const result=await mammoth.extractRawText({arrayBuffer:await file.arrayBuffer()});return String(result.value||'')}
-async function docxHtml(file:File){const mammoth=await mammothAPI();const result=await mammoth.convertToHtml({arrayBuffer:await file.arrayBuffer()});return String(result.value||'')}
+function safeExportHtml(html:string):string{
+ const doc=new DOMParser().parseFromString(html,'text/html');
+ doc.querySelectorAll('script,style,iframe,object,embed,form,input,button,svg,math,link,meta,base').forEach(node=>node.remove());
+ for(const el of Array.from(doc.body.querySelectorAll('*'))){
+  for(const attr of Array.from(el.attributes)){
+   if(attr.name==='href'&&el.tagName==='A'){if(!/^(https?:|mailto:|#)/i.test(attr.value.trim()))el.removeAttribute(attr.name)}
+   else if(attr.name==='src'&&el.tagName==='IMG'){if(!/^data:image\/(png|jpeg|gif|webp);base64,/i.test(attr.value))el.removeAttribute(attr.name)}
+   else if(!['alt','colspan','rowspan'].includes(attr.name))el.removeAttribute(attr.name);
+  }
+ }
+ return doc.body.innerHTML;
+}
+async function docxHtml(file:File){const mammoth=await mammothAPI();const result=await mammoth.convertToHtml({arrayBuffer:await file.arrayBuffer()});return safeExportHtml(String(result.value||''))}
 async function Excel(){const mod:any=await import('exceljs/dist/exceljs.min.js');return mod.default||mod}
 async function workbook():Promise<any>{const X=await Excel();return new X.Workbook()}
 async function writeWorkbook(book:any,name:string):Promise<ProcessedFile>{const bytes=await book.xlsx.writeBuffer();return {name,blob:asBlob(bytes,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}}
@@ -51,10 +63,31 @@ function htmlText(html:string):string{const d=new DOMParser().parseFromString(ht
 async function pptxText(file:File){const {default:JSZip}=await import('jszip');const zip=await JSZip.loadAsync(await file.arrayBuffer());const names=Object.keys(zip.files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n)).sort((a,b)=>Number(a.match(/slide(\d+)/)?.[1])-Number(b.match(/slide(\d+)/)?.[1]));ensure(names.length>0,'PowerPoint slides not found.');const blocks:string[]=[];for(const n of names){const xml=await zip.files[n].async('string');const doc=new DOMParser().parseFromString(xml,'application/xml');const texts=Array.from(doc.getElementsByTagName('a:t')).map(x=>x.textContent||'');blocks.push(`--- Slide ${blocks.length+1} ---\n${texts.join('\n')}`)}return blocks.join('\n\n')}
 async function createPptx(files:Array<{name:string;data:string;width:number;height:number}>):Promise<ProcessedFile>{const mod:any=await import('pptxgenjs');const Pptx=mod.default||mod;const pptx=new Pptx();pptx.layout='LAYOUT_WIDE';for(const item of files){const slide=pptx.addSlide();slide.background={color:'FFFFFF'};const r=Math.min(13.33/item.width,7.5/item.height),w=item.width*r,h=item.height*r;slide.addImage({data:item.data,x:(13.33-w)/2,y:(7.5-h)/2,w,h})}const blob:any=await pptx.write({outputType:'blob'});return {name:'slides-converted.pptx',blob:blob instanceof Blob?blob:asBlob(blob as ArrayBuffer,'application/vnd.openxmlformats-officedocument.presentationml.presentation')}}
 async function comparePdf(files:File[]):Promise<ProcessedFile>{const a=(await allText(files[0])).split('\n'),b=(await allText(files[1])).split('\n');const lines:string[]=[`Text comparison of ${files[0].name} and ${files[1].name}`,'Note: compares selectable text by line, not visual appearance.',''];const total=Math.max(a.length,b.length);for(let i=0;i<total;i++){if(a[i]!==b[i]){lines.push('Line '+(i+1));lines.push('- '+(a[i]||'[missing]'));lines.push('+ '+(b[i]||'[missing]'));lines.push('')}}if(lines.length===3)lines.push('No text differences were found.');return textOut('comparison-report.txt',lines.join('\n'))}
+export async function validateInput(file:File):Promise<void>{
+ const ext=file.name.split('.').pop()?.toLowerCase();
+ const head=new Uint8Array(await file.slice(0,1024).arrayBuffer());
+ const prefix=(values:number[])=>values.every((v,i)=>head[i]===v);
+ if(ext==='pdf')ensure(new TextDecoder().decode(head).includes('%PDF-'),'The selected file does not contain a PDF header.');
+ else if(ext==='png')ensure(prefix([137,80,78,71,13,10,26,10]),'Invalid PNG signature.');
+ else if(ext==='jpg'||ext==='jpeg')ensure(prefix([255,216,255]),'Invalid JPEG signature.');
+ else if(ext==='webp')ensure(new TextDecoder().decode(head.slice(0,4))==='RIFF'&&new TextDecoder().decode(head.slice(8,12))==='WEBP','Invalid WEBP signature.');
+ else if(['docx','xlsx','pptx'].includes(ext||'')){
+  ensure(prefix([80,75,3,4]),'This Office file is not a valid ZIP-based document.');
+  const {default:JSZip}=await import('jszip');const zip=await JSZip.loadAsync(await file.arrayBuffer());
+  const entries=Object.values(zip.files);let expanded=0;
+  ensure(entries.length<=5000,'Office archive contains too many entries.');
+  for(const entry of entries){expanded+=(entry as any)._data?.uncompressedSize||0;ensure(expanded<=80*1048576,'Office archive expands beyond the 80 MB safety limit.');}
+  const required=ext==='docx'?'word/document.xml':ext==='xlsx'?'xl/workbook.xml':'ppt/presentation.xml';
+  ensure(!!zip.file(required)&&!!zip.file('[Content_Types].xml'),'Office document contents do not match the selected format.');
+ }else if(['txt','csv','html','htm'].includes(ext||''))ensure(!head.includes(0),'Binary data is not accepted as text.');
+ else fail('Unsupported input format.');
+}
 export async function processFile(slug:string,files:File[],options:Opt):Promise<ProcessedFile[]>{
  ensure(files.length>0,'Choose at least one file.');
  ensure(files.every(f=>f.size>0&&f.size<=15*1024*1024),'Each file must be between 1 byte and 15 MB.');
  ensure(files.reduce((n,f)=>n+f.size,0)<=45*1024*1024,'Files exceed the 45 MB combined limit.');
+ ensure(files.length<=12,'Select 12 files or fewer.');
+ for(const file of files)await validateInput(file);
  const first=files[0],name=stem(first.name);
  // PDF pages are handled using pdf-lib for page-level operations.
  if(['merge-pdf','split-pdf','compress-pdf','rotate-pdf','extract-pdf-pages','delete-pdf-pages','add-page-numbers','watermark-pdf','crop-pdf','repair-pdf','flatten-pdf','pdf-metadata','add-blank-pages','fill-pdf-form'].includes(slug)){
@@ -66,7 +99,7 @@ export async function processFile(slug:string,files:File[],options:Opt):Promise<
    // Try structural optimization first, then raster JPEG reduction when it is actually smaller.
    const structural=await pdfOut(doc,`${name}-optimized.pdf`);
    if(structural.blob.size<first.size*.96)return [structural];
-   const source=await pdfJs(first);ensure(source.numPages<=LIMIT_PDF_PAGES,'Compress PDF supports up to 30 pages per operation. Split large files first.');
+   const source=await pdfJs(first);try{ensure(source.numPages<=LIMIT_PDF_PAGES,'Compress PDF supports up to 30 pages per operation. Split large files first.');
    const mode=options.quality||'ebook';const factor=mode==='screen'?.75:mode==='printer'?1.4:1.0;
    const quality=mode==='screen'?.5:mode==='printer'?.85:.68;
    const optimized=await PDFDocument.create();
@@ -79,14 +112,14 @@ export async function processFile(slug:string,files:File[],options:Opt):Promise<
    }
    const reduced=await pdfOut(optimized,`${name}-compressed.pdf`);
    if(reduced.blob.size>=first.size)return fail('This file is already compact. No meaningful size reduction was possible without increasing its size.');
-   return [reduced];
+   return [reduced];}finally{await source.destroy()}
   }
   if(slug==='rotate-pdf'){const angle=int(options.angle,90);ensure([90,180,270].includes(angle),'Choose a valid rotation angle.');doc.getPages().forEach(p=>p.setRotation(degrees((p.getRotation().angle+angle)%360)))}
   if(slug==='extract-pdf-pages'||slug==='delete-pdf-pages'){const selection=parsePages(options.pages,total);const keep=slug==='extract-pdf-pages'?selection:doc.getPageIndices().filter(i=>!selection.includes(i));ensure(keep.length>0,'Cannot output a PDF without any pages.');const output=await PDFDocument.create();(await output.copyPages(doc,keep)).forEach(p=>output.addPage(p));return [await pdfOut(output,`${name}-${slug==='extract-pdf-pages'?'extracted':'filtered'}.pdf`)]}
   if(slug==='add-page-numbers'){const font=await doc.embedFont(StandardFonts.Helvetica);doc.getPages().forEach((p,i)=>p.drawText(`${i+1} / ${total}`,{x:Math.max(25,p.getWidth()/2-15),y:22,size:10,font,color:rgb(.1,.15,.25)}))}
   if(slug==='watermark-pdf'){const font=await doc.embedFont(StandardFonts.HelveticaBold);const text=(options.text||'DRAFT').replace(/[^\x20-\x7e]/g,'').slice(0,64);ensure(text.length>0,'Enter a watermark.');doc.getPages().forEach(p=>p.drawText(text,{x:p.getWidth()*.12,y:p.getHeight()*.5,size:Math.min(42,p.getWidth()/12),font,rotate:degrees(30),opacity:.22,color:rgb(.8,.14,.2)}))}
   if(slug==='crop-pdf'){const m=int(options.margin,18);ensure(m>=0&&m<=150,'Margin must be between 0 and 150 points.');doc.getPages().forEach(p=>{const {width,height}=p.getSize();ensure(width>2*m+10&&height>2*m+10,'Crop margin is too large.');p.setCropBox(m,m,width-2*m,height-2*m)})}
-  if(slug==='flatten-pdf'){try{doc.getForm().flatten()}catch{} }
+  if(slug==='flatten-pdf'){try{doc.getForm().flatten()}catch{fail('This PDF form could not be flattened.')} }
   if(slug==='pdf-metadata'){doc.setTitle((options.title||'').slice(0,250));doc.setAuthor((options.author||'').slice(0,250))}
   if(slug==='add-blank-pages'){const last=doc.getPage(total-1);doc.addPage([last.getWidth(),last.getHeight()])}
   if(slug==='fill-pdf-form'){const field=(options.field||'').trim();ensure(field,'Enter an existing form field name.');const form=doc.getForm();try{form.getTextField(field).setText((options.value||'').slice(0,2000));form.updateFieldAppearances()}catch{fail('Text form field not found. Check the exact field name.')}}
@@ -97,7 +130,7 @@ export async function processFile(slug:string,files:File[],options:Opt):Promise<
   if(slug==='pdf-to-text')return [textOut(`${name}.txt`,await allText(first))];
   if(slug==='pdf-to-word'){const text=await allText(first);ensure(text.trim(),'This PDF has no selectable text. Scanned images require OCR.');return [await createDocx(text,`${name}.docx`)]}
   if(slug==='pdf-to-excel'){const text=await allText(first);ensure(text.trim(),'No selectable text was found in the PDF.');const book=await workbook(),sheet=book.addWorksheet('Extracted text');for(const line of text.split('\n').slice(0,30000)){const cells=line.split(/\s{2,}|\t+/);sheet.addRow(cells)}return [await writeWorkbook(book,`${name}-extracted.xlsx`)]}
-  const doc=await pdfJs(first);ensure(doc.numPages<=LIMIT_PDF_PAGES,'For image-based PDF tools, split the PDF to 30 pages or fewer.');
+  const doc=await pdfJs(first);try{ensure(doc.numPages<=LIMIT_PDF_PAGES,'For image-based PDF tools, split the PDF to 30 pages or fewer.');
   if(slug==='pdf-to-jpg'||slug==='pdf-to-png'){const mime=slug==='pdf-to-jpg'?'image/jpeg':'image/png',ext=slug==='pdf-to-jpg'?'jpg':'png';const results:ProcessedFile[]=[];for(let i=1;i<=doc.numPages;i++){const c=await render(doc,i);results.push({name:`${name}-${String(i).padStart(3,'0')}.${ext}`,blob:await canvasBlob(c,mime)})}return results.length===1?results:[await fileZip(results,`${name}-${ext}.zip`)]}
   if(slug==='pdf-to-powerpoint'){const images:Array<{name:string;data:string;width:number;height:number}>=[];for(let i=1;i<=doc.numPages;i++){const c=await render(doc,i,1.1);images.push({name:`Page ${i}`,data:c.toDataURL('image/png'),width:c.width,height:c.height})}return [await createPptx(images)]}
   const {PDFDocument}=await pdfLib();const out=await PDFDocument.create();let retained=0;
@@ -111,8 +144,8 @@ export async function processFile(slug:string,files:File[],options:Opt):Promise<
      const copied=await out.copyPages(original!,[i-1]);out.addPage(copied[0]);retained++;continue;
    }
    for(let p=0;p<pixels.data.length;p+=4){const gray=Math.round(pixels.data[p]*.299+pixels.data[p+1]*.587+pixels.data[p+2]*.114);pixels.data[p]=pixels.data[p+1]=pixels.data[p+2]=gray}ctx.putImageData(pixels,0,0);
-   const image=await out.embedPng(new Uint8Array(await (await canvasBlob(c,'image/png')).arrayBuffer()));const page=out.addPage([c.width,c.height]);page.drawImage(image,{x:0,y:0,width:c.width,height:c.height});retained++;
-  }ensure(retained>0,'All pages appeared blank; no output was generated.');return [await pdfOut(out,`${name}-${slug}.pdf`)];
+   const image=await out.embedPng(new Uint8Array(await (await canvasBlob(c,'image/png')).arrayBuffer()));const sourcePage=await doc.getPage(i),dimensions=sourcePage.getViewport({scale:1});const page=out.addPage([dimensions.width,dimensions.height]);page.drawImage(image,{x:0,y:0,width:dimensions.width,height:dimensions.height});retained++;
+  }ensure(retained>0,'All pages appeared blank; no output was generated.');return [await pdfOut(out,`${name}-${slug}.pdf`)];}finally{await doc.destroy()}
  }
  if(slug==='text-to-pdf')return [await drawTextPdf(await first.text(),`${name}.pdf`)];
  if(['jpg-to-pdf','png-to-pdf','image-to-pdf'].includes(slug))return [await rasterImagesToPdf(files)];

@@ -25,7 +25,7 @@
     "slug": "compress-pdf",
     "name": "Compress PDF",
     "category": "PDF",
-    "description": "Reduce file size using Ghostscript; result may vary.",
+    "description": "Optimize PDF structure or render smaller image-based pages.",
     "accept": ".pdf",
     "multi": false,
     "controls": [
@@ -279,7 +279,7 @@
     "accept": ".pdf",
     "multi": false,
     "controls": [],
-    "notice": "This rasterizes page content and may increase file size.",
+    "notice": "Flattens supported AcroForm fields into page content. This does not rasterize pages or flatten every PDF annotation type.",
     "engine": "browser"
   },
   {

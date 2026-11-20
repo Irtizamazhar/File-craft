@@ -1,5 +1,7 @@
 import {readFileSync} from 'node:fs';
 import mysql from 'mysql2/promise';
+import nextEnv from '@next/env';
+nextEnv.loadEnvConfig(process.cwd());
 const url=process.env.DATABASE_URL;
 if(!url){console.error('DATABASE_URL missing. Create your .env.local or set environment variables.');process.exit(1)}
 const conn=await mysql.createConnection({uri:url,multipleStatements:false});

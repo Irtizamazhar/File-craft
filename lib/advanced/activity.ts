@@ -1,0 +1,1 @@
+export function recordAdvancedCompletion(tool:'edit-pdf'|'remove-background'|'file-compressor'){void fetch('/api/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool,status:'completed'})}).catch(()=>{})}

@@ -1,16 +1,13 @@
 'use client';
-import {useRef,useState,DragEvent} from 'react';
+import {useRef,useState} from 'react';
 import Link from 'next/link';
-import {CloudUpload,File,ArrowRight,Check,FolderOpen,ShieldCheck} from 'lucide-react';
+import {CloudUpload,ArrowRight,LockKeyhole,X,Loader2} from 'lucide-react';
+import {tools} from '@/lib/tools';
+import {handoffFiles} from '@/lib/file-handoff';
 export default function HeroUpload(){
- const input=useRef<HTMLInputElement>(null);const [name,setName]=useState('');const [isDrag,setDrag]=useState(false);
- const onFile=(f?:File)=>{if(f)setName(f.name)};
- const extension=name.split('.').pop()?.toLowerCase();
- const choices=extension==='pdf'?[['Merge PDF','merge-pdf'],['Compress PDF','compress-pdf'],['PDF to Word','pdf-to-word']]:['docx'].includes(extension||'')?[['Word to PDF','docx-to-pdf']]:['xlsx'].includes(extension||'')?[['Excel to PDF','xlsx-to-pdf']]:['jpg','jpeg','png','webp'].includes(extension||'')?[['Image to PDF','image-to-pdf'],['Resize image','resize-image']]:[['Browse tools','']];
- return <div className={'hero-drop '+(isDrag?'dragging':'')} onDragOver={(e:DragEvent)=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={(e:DragEvent)=>{e.preventDefault();setDrag(false);onFile(e.dataTransfer.files[0])}}>
- <div className="drop-symbol"><CloudUpload size={30}/></div>
- {name?<><strong className="upload-selected"><File size={17}/>{name}</strong><span className="drop-subtitle">Choose a tool below, then upload your file to process it.</span><div className="file-suggestions">{choices.map(([text,slug])=><Link key={text} className="suggestion-chip" href={slug?'/tools/'+slug:'/tools'}>{text}<ArrowRight size={14}/></Link>)}</div></>:<><strong>Drop your files here</strong><span className="drop-subtitle">or click to explore your files</span><button type="button" className="btn btn-primary big-upload" onClick={()=>input.current?.click()}>Select a file <ArrowRight size={16}/></button><small>PDF, DOCX, XLSX, PPTX & images</small></>}
- <input type="file" ref={input} hidden accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png,.webp" onChange={e=>onFile(e.target.files?.[0])}/>
- <div className="drop-footer"><span><ShieldCheck size={14}/> On-device processing</span><span><Check size={14}/> No account required for basic tools</span></div>
- </div>;
+ const input=useRef<HTMLInputElement>(null),run=useRef(0);const [files,setFiles]=useState<File[]>([]),[drag,setDrag]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ async function select(received:FileList|null){if(!received?.length)return;const id=++run.current;setError('');setBusy(true);try{const incoming=Array.from(received);if(incoming.length>12||incoming.some(f=>!f.size||f.size>15*1048576)||incoming.reduce((n,f)=>n+f.size,0)>45*1048576)throw Error('Choose up to 12 nonempty files, 15 MB each and 45 MB total.');const {validateInput}=await import('@/lib/browser-engine');for(const f of incoming)await validateInput(f);if(run.current===id)setFiles(incoming)}catch(e){if(run.current===id){setFiles([]);setError((e as Error).message)}}finally{if(run.current===id)setBusy(false)}}
+ const choices=tools.filter(t=>(t.multi||files.length===1)&&files.every(f=>t.accept.split(',').includes('.'+f.name.split('.').pop()?.toLowerCase()))).slice(0,6);
+ const clear=()=>{run.current++;setFiles([]);setBusy(false);setError('')};
+ return <div className={'hero-drop '+(drag?'dragging':'')} onDragOver={e=>{e.preventDefault();setDrag(true)}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);void select(e.dataTransfer.files)}}><CloudUpload className="hero-upload-icon" size={62} strokeWidth={1.5}/>{busy?<><strong>Checking your files...</strong><Loader2 className="spin"/><button className="btn btn-outline" onClick={clear}>Cancel selection</button></>:files.length?<><strong>{files.length===1?files[0].name:files.length+' files selected'}</strong><span className="drop-subtitle">Choose what you would like to do. Your files stay on this device.</span><div className="file-suggestions">{choices.map(t=><Link key={t.slug} className="suggestion-chip" href={'/tools/'+t.slug} onClick={()=>handoffFiles(t.slug,files)}>{t.name}<ArrowRight size={14}/></Link>)}</div><button className="upload-reset" onClick={clear}><X size={15}/> Clear selection</button></>:<><strong>Drag and drop your files here</strong><span className="drop-subtitle">or click below to select files</span><button className="btn btn-primary big-upload" onClick={()=>input.current?.click()}>Select files</button></>}<input type="file" multiple ref={input} hidden accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png,.webp,.txt,.csv,.html" onChange={e=>{void select(e.target.files);e.target.value=''}}/>{error&&<p className="form-error" role="alert">{error}</p>}<p className="upload-privacy"><LockKeyhole size={16}/> On-device processing. No document upload to our server.</p></div>
 }

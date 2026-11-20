@@ -1,67 +1,58 @@
-# FileCraft — Hostinger-friendly Next.js full-stack application
+# FileCraft
+Existing Next.js App Router + React + TypeScript + mysql2/promise application. The approved coral/navy/blush/lavender design is applied across public, tool, account and system screens. All existing tool routes and database records are retained.
 
-**Source release:** 12 November 2026. React 18 + Next.js 14.2.35, Next.js route-handler APIs, MySQL, browser-based file conversion. One project folder, one Node.js website, no companion backend application required.
+## Windows startup
+Use Node.js 22 LTS or another supported runtime. Keep .env.local private and point DATABASE_URL at the existing filecraft database. Beekeeper Studio is a database client. NEXT_PUBLIC_SITE_URL must match the actual local browser origin (normally http://localhost:3000).
 
-## What it does
+~~~powershell
+npm.cmd install
+npm.cmd run db:verify
+npm.cmd run dev
+~~~
 
-The public tool catalog exposes **48 browser-routed utilities**; six requested advanced utilities are intentionally deferred. Files opened for the listed conversion tools are processed *inside the visitor's browser*, and source document contents are not posted to the backend. Signed-in users can optionally record conversion-event metadata in MySQL. Server APIs handle accounts, sessions, messages, and admin reporting.
+Open http://localhost:3000. Do not copy .env.example over your existing configuration.
 
-**Verification distinction:** Source code and routing checks are not equivalent to a successful Next.js build, real conversion tests in multiple browsers, or deployment validation. This project was prepared in a restricted environment without npm registry access, so installation, production compilation, live MySQL access, and end-to-end file testing remain required before publishing. Read `docs/VALIDATION_STATUS.md`.
+For a new database only, npm.cmd run db:init creates missing tables and plan seeds without resetting records. Inspect the schema before applying it to an existing database. No migrations were needed during the UI redesign.
 
-## Run on Windows (VS Code)
+Production: npm.cmd run build then npm.cmd start. Development uses .next-development; production uses .next-production. Configure the real HTTPS public domain before a deployment build.
 
-Install Node.js 20/22/24 and open this extracted folder in VS Code. For guest tools, no local database is necessary.
+## Implemented workflows
+- 48 existing browser document/image utilities with validated selection, actual processing and downloads.
+- Homepage file selection handed directly to an explicitly chosen compatible tool in memory.
+- Redesigned /tools directory: 51 entries, combined search/filters, desktop sidebar and mobile category sheet.
+- /edit-pdf: real supported original object removal/replacement plus additions, page/history controls and PDF export.
+- /remove-background: general-object BiRefNet Lite by default, optional portrait mode, subject-region selection, soft brushes/edges, history, transforms and alpha PNG export.
+- /file-compressor: real PDF/image/Office/ZIP compression, per-format settings, byte savings and batch downloads.
+- Database-informed Free plan/current account state; planned paid features labeled accurately.
+- Account profile/password settings, activity, browser-local saved shortcuts, contact records.
+- Cookie/features/conversion pages, tool-specific output/limitation content and FAQ.
 
-```powershell
-npm install
-Copy-Item .env.example .env.local
-npm run dev
-```
+No paid purchase activation, SMTP reset/verification, full editable Office reconstruction, OCR, account deletion or full admin management is claimed.
 
-Visit http://localhost:3000. Browser-based tools should work without configuring MySQL, after package installation and once the local PDF.js worker is copied during npm install.
+## Real verification
+- npm.cmd run typecheck; npm.cmd run lint; npm.cmd test (24 passed); npm.cmd run build.
+- npm.cmd run db:verify: real SELECT 1 and six tables/index inventories.
+- npm.cmd run test:browser:chromium: latest background-remover run: 220 passed, 2 failed (the retained purple-lit laptop quality assertions). All 48 original tools passed on both profiles. Signup/contact write tests were excluded to preserve database records.
+- npm.cmd run test:browser includes Firefox/WebKit, currently blocked by Windows DLL dependencies. This is not a claim of universal browser support.
+- Browser tests default to localhost:3100; start a local app at that origin or set TEST_BASE_URL. See the final report for an isolated QA command.
+- npm.cmd run test:auth performs real account writes and retains its clearly identified verification account under the no-deletion policy. Point it only at an authorized test environment.
 
-For registration, contact records, and account history, use a **real MySQL server**, create a database, and import `sql/schema.sql`. Set `DATABASE_URL` in `.env.local` (never commit the file), restart Next.js, then use `npm run dev`. Beekeeper Studio is a database *client*, not the database server.
+Security updates include Next.js 15.5.29, MySQL2 3.24.6, Mammoth 1.13.0 and a PostCSS override. Remaining dependency findings and release limitations are documented. Never commit real credentials in .env.example or .env.local.
 
-## Deploy on Hostinger Unlimited (50 GB plan)
+Advanced assets are already local. Build/postinstall copy runtime files from installed dependencies and verify the pinned portrait model checksum; production builds do not download models. General-object segmentation needs visual review: a purple-lit laptop still fails the quality fixture. The optional MODNet mode remains portrait-specific. PDF replacement uses supported top-level objects and Helvetica Latin/ASCII. OCR and media compression are not implemented. Dependency audit still reports one high and eight moderate findings.
 
-1. Confirm your hPanel offers **Add Website → Node.js Web App**. Older versions of the plan may not support this; contact Hostinger if the option is absent.
-2. In hPanel create a MySQL database and database user. Import `sql/schema.sql` with phpMyAdmin.
-3. Configure environment variables in hPanel, using your **real** domain: `NEXT_PUBLIC_SITE_URL`, `DATABASE_URL`, `NEXT_PUBLIC_INDEXABLE`, and optional Google verification/AdSense values. Hostinger Node + MySQL usually uses `127.0.0.1:3306` inside the hosting account, not the public MySQL hostname.
-4. Upload the **project source ZIP** via hPanel Node.js website creation (or connect a GitHub repository). The ZIP must have `package.json` at its root. Select Node.js 22.x or another supported modern LTS version.
-5. Run deployment build and verify HTTPS, public pages, and database health. After the website and legal pages are complete, set `NEXT_PUBLIC_INDEXABLE=true`, rebuild, and check `robots.txt` and `sitemap.xml`.
-6. Run the `npm run smoke -- https://your-real-domain.com` smoke test from your laptop, then manually perform real file conversions and account tests.
+The general-object model is already present locally. For a fresh checkout, run `node scripts/setup-object-model.mjs` before installation/build; the 192 MB weights are ignored by Git and validated against a pinned SHA-256. Model copying/builds remain offline after setup. See the background-remover report for current QA failures and performance limits.
 
-**Hostinger limitation:** This plan has a 120-second Node.js request timeout and does not offer persistent background conversion services. Here, file conversion is deliberately performed in the user's browser to avoid that restriction. CPU and memory usage will occur on visitors' devices. Very large/complex files may not succeed. There is no guarantee of flawless conversion for arbitrary documents.
+## Handover
+- [Background remover fix, real watch results and remaining quality failure](docs/FILECRAFT_BACKGROUND_REMOVER_QA.md)
+- [Advanced upgrade, measured outputs, screenshots and limitations](docs/FILECRAFT_ALL_TOOLS_ADVANCED_UPGRADE.md)
+- [Final QA, exact file inventory and startup](docs/FILECRAFT_FINAL_QA_REPORT.md)
+- [Design system](docs/FILECRAFT_UI_DESIGN_SYSTEM.md)
+- [Every tool status](docs/FILECRAFT_TOOL_VERIFICATION.md)
+- [Initial audit](docs/FILECRAFT_INITIAL_AUDIT.md)
+- [SEO audit](docs/FILECRAFT_SEO_AUDIT.md)
+- [AdSense readiness](docs/FILECRAFT_ADSENSE_READINESS.md)
+- [Hostinger deployment](docs/FILECRAFT_HOSTINGER_DEPLOYMENT.md)
+- [MySQL setup](docs/MYSQL_BEEKEEPER_SETUP.md)
 
-Read `docs/HOSTINGER_DEPLOYMENT.md` and `docs/ADSENSE_SEO_LAUNCH.md` before attempting a public launch.
-
-## MySQL with Beekeeper Studio
-
-Database tables: `users`, `sessions`, `activity`, `contact_messages`.
-
-For Hostinger remote Beekeeper connections, allowlist **only your laptop's public IP** in hPanel Remote MySQL, then connect to the assigned remote hostname on port 3306. Do not enable open access to all IP addresses. When deployed on Hostinger, the Next.js application should use `127.0.0.1` in its `DATABASE_URL`. Do not put database credentials in public frontend variables.
-
-## Commands
-
-```bash
-npm install           # Downloads project dependencies
-npm run dev           # Development website and API
-npm run test          # Static source/inventory checks only
-npm run check:source  # Verifies tool routing inventory
-npm run typecheck     # TypeScript check (requires dependencies)
-npm run build         # Next.js production build (requires dependencies)
-npm run start         # Starts built Next.js server
-npm run db:init       # Applies SQL schema when DATABASE_URL is set in process environment
-npm run smoke -- https://example.com
-```
-
-For MySQL setup, importing `sql/schema.sql` from phpMyAdmin/Beekeeper is the simplest approach. `db:init` expects the `DATABASE_URL` environment variable to already be exported.
-
-## Important launch limitations
-
-- All 48 processing routes have source implementations, **not independently verified browser test passes**.
-- Password-protected PDF unlocking, encrypted PDF protection, and OCR are not included; these are not silently shown as working tools.
-- PDF/Office conversion fidelity varies. Some transformations explicitly extract text or rasterize pages. Read the warning on each tool page.
-- No email verification, password-reset email workflow, payment subscriptions, ad-consent platform, independent security assessment, or AdSense approval is included.
-- The site must provide real ownership information, an accurate privacy policy, terms and contact methods before AdSense review.
-- AdSense review and search rankings are entirely Google's decisions, not guaranteed by site code.
+No Git push or production deployment was performed. Full public production readiness is not claimed.

@@ -1,3 +1,4 @@
+import {PHASE_DEVELOPMENT_SERVER} from 'next/constants.js';
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode:true,
@@ -10,4 +11,5 @@ const nextConfig = {
     {key:'Content-Security-Policy',value:"frame-ancestors 'none'; base-uri 'self'; object-src 'none'"}
   ]}]}
 };
-export default nextConfig;
+// Keep live development from overwriting production route manifests.
+export default phase=>({...nextConfig,distDir:phase===PHASE_DEVELOPMENT_SERVER?'.next-development':'.next-production'});

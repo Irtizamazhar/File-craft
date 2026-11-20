@@ -1,0 +1,2 @@
+import {defineConfig,devices} from '@playwright/test';
+export default defineConfig({testDir:'./tests/browser',timeout:60000,expect:{timeout:15000},workers:2,reporter:[['list'],['json',{outputFile:'test-results/browser-results.json'}]],use:{baseURL:process.env.TEST_BASE_URL||'http://localhost:3100',trace:'retain-on-failure',screenshot:'only-on-failure'},projects:[{name:'chromium',use:{...devices['Desktop Chrome']}},{name:'mobile-chromium',use:{...devices['Pixel 7']}},{name:'firefox',use:{...devices['Desktop Firefox']}},{name:'webkit',use:{...devices['iPhone 13']}}]});

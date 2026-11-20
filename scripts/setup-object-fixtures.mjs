@@ -1,0 +1,5 @@
+﻿import {mkdir,writeFile,access} from 'node:fs/promises';
+const photos={watch:'1523275335684-37898b6baf30','watch-complex':'1524805444758-089113d48a6d','watch-dark':'1547996160-81dfa63595aa',shoes:'1542291026-7eec264c27ff',bag:'1584917865442-de89df76afd3',jewelry:'1611652022419-a9419f74343d',bottle:'1602143407151-7111542de6e8',electronics:'1517336714731-489689fd1ca8',furniture:'1598300042247-d088f8ab3a91',animal:'1517849845537-4d257902454a'};
+await mkdir('tests/fixtures/objects',{recursive:true});
+for(const [name,id]of Object.entries(photos)){const path=`tests/fixtures/objects/${name}.jpg`;try{await access(path);continue}catch{}const url=`https://images.unsplash.com/photo-${id}?w=720&fit=max&q=90&fm=jpg`;const res=await fetch(url,{signal:AbortSignal.timeout(30000)});if(!res.ok){console.log(name+': HTTP '+res.status);continue}const bytes=Buffer.from(await res.arrayBuffer());await writeFile(path,bytes);console.log(name+': '+bytes.length)}
+await writeFile('tests/fixtures/objects/sources.json',JSON.stringify({license:'https://unsplash.com/license',photos},null,2));

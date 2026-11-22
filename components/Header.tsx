@@ -1,13 +1,154 @@
 'use client';
+
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import {useEffect,useRef,useState} from 'react';
+import {useCallback,useEffect,useRef,useState,type PointerEvent} from 'react';
 import {Menu,X,ChevronDown,ArrowRight} from 'lucide-react';
 import Brand from './Brand';
-const menus=[{label:'All tools',links:[['All tools','/tools'],['Word & documents','/document-tools'],['Images','/image-tools']]},{label:'PDF tools',links:[['Merge PDF','/tools/merge-pdf'],['Compress PDF','/tools/compress-pdf'],['Split PDF','/tools/split-pdf'],['Edit PDF','/edit-pdf'],['File Compressor','/file-compressor'],['All PDF tools','/pdf-tools']]},{label:'Convert',links:[['PDF to Word','/tools/pdf-to-word'],['Images to PDF','/tools/image-to-pdf'],['Word to PDF','/tools/docx-to-pdf'],['All conversions','/convert-tools']]}];
+
+const menus=[
+  {label:'All tools',links:[['All tools','/tools'],['Remove Background','/remove-background'],['File Compressor','/file-compressor'],['Word & documents','/document-tools'],['Images','/image-tools']]},
+  {label:'PDF tools',links:[['Merge PDF','/tools/merge-pdf'],['Compress PDF','/tools/compress-pdf'],['Split PDF','/tools/split-pdf'],['Edit PDF','/edit-pdf'],['File Compressor','/file-compressor'],['All PDF tools','/pdf-tools']]},
+  {label:'Convert',links:[['PDF to Word','/tools/pdf-to-word'],['Images to PDF','/tools/image-to-pdf'],['Word to PDF','/tools/docx-to-pdf'],['All conversions','/convert-tools']]}
+];
+const hoverQuery='(min-width: 901px) and (any-hover: hover) and (any-pointer: fine)';
+const panelId=(label:string)=>'menu-'+label.replaceAll(' ','-');
+type Disclosure={label:string;source:'hover'|'click'|'keyboard'};
+
+function canHover(event:PointerEvent){
+  return event.pointerType==='mouse'&&window.matchMedia(hoverQuery).matches;
+}
+
 export default function Header(){
- const [open,setOpen]=useState(false),[menu,setMenu]=useState<string|null>(null);const pathname=usePathname();const root=useRef<HTMLElement>(null);
- useEffect(()=>{setOpen(false);setMenu(null)},[pathname]);
- useEffect(()=>{const close=(e:PointerEvent)=>{if(!root.current?.contains(e.target as Node)){setMenu(null);setOpen(false)}};document.addEventListener('pointerdown',close);return()=>document.removeEventListener('pointerdown',close)},[]);
- return <>{pathname==='/tools'&&<div className="directory-announcement">Your documents, simplified</div>}<header className={'site-header '+(pathname==='/tools'?'directory-header':'')} ref={root} onKeyDown={e=>{if(e.key==='Escape'){const dropdown=(e.target as HTMLElement).closest('.nav-dropdown');const toggle=dropdown?.querySelector('button');setMenu(null);if(toggle)toggle.focus();else{setOpen(false);root.current?.querySelector<HTMLButtonElement>('.mobile-menu')?.focus()}}}}><div className="container header-inner"><Brand/><nav id="main-navigation" className={'site-nav '+(open?'open':'')} aria-label="Main navigation">{menus.map(item=><div className="nav-dropdown" key={item.label}><button type="button" aria-expanded={menu===item.label} aria-controls={'menu-'+item.label.replaceAll(' ','-')} onClick={()=>setMenu(menu===item.label?null:item.label)}>{item.label}<ChevronDown size={15}/></button><div id={'menu-'+item.label.replaceAll(' ','-')} className="nav-dropdown-panel" hidden={menu!==item.label}>{item.links.map(([label,href])=><Link key={href} href={href} onClick={()=>{setMenu(null);setOpen(false)}}>{label}<ArrowRight size={14}/></Link>)}</div></div>)}<Link className={pathname==='/features'?'current':''} href="/features">Features</Link><Link className={pathname==='/pricing'?'current':''} href="/pricing">Pricing</Link><div className="mobile-auth"><Link href="/login">Log in</Link><Link href="/register" className="btn btn-primary">Get started</Link></div></nav><div className="nav-actions"><Link href="/login" className="nav-login">Log in</Link><Link href="/register" className="btn btn-primary btn-nav">Get started</Link></div><button className="mobile-menu" type="button" aria-label={open?'Close navigation':'Open navigation'} aria-expanded={open} aria-controls="main-navigation" onClick={()=>setOpen(!open)}>{open?<X/>:<Menu/>}</button></div></header></>
+  const [open,setOpen]=useState(false);
+  const [menu,setMenu]=useState<Disclosure|null>(null);
+  const pathname=usePathname();
+  const root=useRef<HTMLElement>(null);
+  const closeTimer=useRef<number|undefined>(undefined);
+  const pressedTrigger=useRef<Element|null>(null);
+
+  const cancelClose=useCallback(()=>{
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current=undefined;
+  },[]);
+  const dismiss=useCallback(()=>{
+    cancelClose();
+    pressedTrigger.current=null;
+    setMenu(null);
+    setOpen(false);
+  },[cancelClose]);
+
+  useEffect(()=>{dismiss()},[pathname,dismiss]);
+  useEffect(()=>{
+    const outside=(event:globalThis.PointerEvent)=>{
+      if(!root.current?.contains(event.target as Node))dismiss();
+    };
+    const desktop=window.matchMedia('(min-width: 901px)');
+    document.addEventListener('pointerdown',outside);
+    desktop.addEventListener('change',dismiss);
+    return ()=>{
+      document.removeEventListener('pointerdown',outside);
+      desktop.removeEventListener('change',dismiss);
+      cancelClose();
+    };
+  },[cancelClose,dismiss]);
+
+  useEffect(()=>{
+    if(!menu&&!open)return;
+    function escape(event:KeyboardEvent){
+      if(event.key!=='Escape'||event.defaultPrevented)return;
+      const focusInHeader=root.current?.contains(document.activeElement);
+      if(!menu&&!focusInHeader)return;
+      event.preventDefault();
+      if(menu){
+        cancelClose();
+        setMenu(null);
+        if(focusInHeader||menu.source!=='hover')document.getElementById(panelId(menu.label)+'-trigger')?.focus();
+      }else{
+        dismiss();
+        root.current?.querySelector<HTMLButtonElement>('.mobile-menu')?.focus();
+      }
+    }
+    document.addEventListener('keydown',escape);
+    return ()=>document.removeEventListener('keydown',escape);
+  },[menu,open,cancelClose,dismiss]);
+
+  function hoverMenu(event:PointerEvent,label:string){
+    if(!canHover(event))return;
+    cancelClose();
+    setMenu(current=>{
+      if(current?.label===label)return current;
+      const focusedPanel=document.activeElement?.closest('.nav-dropdown-panel');
+      if(current&&focusedPanel?.id===panelId(current.label))return current;
+      return {label,source:'hover'};
+    });
+  }
+
+  function leaveMenu(event:PointerEvent,label:string){
+    if(!canHover(event)||menu?.label!==label||menu.source==='keyboard')return;
+    cancelClose();
+    closeTimer.current=window.setTimeout(()=>{
+      closeTimer.current=undefined;
+      setMenu(current=>current?.label===label&&current.source!=='keyboard'&&
+        !document.getElementById(panelId(label))?.contains(document.activeElement)?null:current);
+    },200);
+  }
+
+  return <header className="site-header" ref={root}
+    onMouseDownCapture={event=>{pressedTrigger.current=(event.target as Element).closest('.nav-dropdown > button')}}
+    onMouseUpCapture={()=>{pressedTrigger.current=null}}
+    onPointerCancel={()=>{pressedTrigger.current=null}}
+    onClick={event=>{
+    if((event.target as Element).closest('a[href]'))dismiss();
+  }}>
+    <div className="container header-inner">
+      <Brand/>
+      <button className="mobile-menu" type="button" aria-label={open?'Close navigation':'Open navigation'}
+        aria-expanded={open} aria-controls="main-navigation" onClick={()=>open?dismiss():setOpen(true)}>
+        {open?<X aria-hidden="true"/>:<Menu aria-hidden="true"/>}
+      </button>
+      <nav id="main-navigation" className={'site-nav '+(open?'open':'')} aria-label="Main navigation">
+        {menus.map(item=>{
+          const id=panelId(item.label);
+          const expanded=menu?.label===item.label;
+          return <div className="nav-dropdown" key={id}
+            onPointerEnter={event=>hoverMenu(event,item.label)}
+            onPointerLeave={event=>leaveMenu(event,item.label)}
+            onBlur={event=>{
+              // Keep stacked triggers in place until the pointer click can complete.
+              if(expanded&&(!pressedTrigger.current||event.relatedTarget!==pressedTrigger.current)&&
+                !event.currentTarget.contains(event.relatedTarget)){
+                cancelClose();
+                setMenu(current=>current?.label===item.label?null:current);
+              }
+            }}>
+            <button id={id+'-trigger'} type="button" aria-expanded={expanded} aria-controls={id}
+              onClick={event=>{
+                cancelClose();
+                const keyboard=event.detail===0;
+                setMenu(current=>{
+                  if(current?.label===item.label&&current.source!=='hover')return null;
+                  return {label:item.label,source:keyboard?'keyboard':'click'};
+                });
+              }}
+              onKeyDown={event=>{
+                if(event.key==='Tab'&&expanded){
+                  cancelClose();
+                  setMenu({label:item.label,source:'keyboard'});
+                }
+              }}>
+              {item.label}<ChevronDown size={15} aria-hidden="true"/>
+            </button>
+            <div id={id} className="nav-dropdown-panel" hidden={!expanded}>
+              {item.links.map(([label,href])=><Link key={href} href={href}>{label}<ArrowRight size={14} aria-hidden="true"/></Link>)}
+            </div>
+          </div>;
+        })}
+        <Link className={pathname==='/features'?'current':''} href="/features">Features</Link>
+        <Link className={pathname==='/pricing'?'current':''} href="/pricing">Pricing</Link>
+        <div className="mobile-auth"><Link href="/login">Log in</Link><Link href="/register" className="btn btn-primary">Get started</Link></div>
+      </nav>
+      <div className="nav-actions"><Link href="/login" className="nav-login">Log in</Link><Link href="/register" className="btn btn-primary btn-nav">Get started</Link></div>
+    </div>
+  </header>;
 }

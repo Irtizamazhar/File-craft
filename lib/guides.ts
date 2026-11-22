@@ -5,6 +5,15 @@ export type Guide = {
 };
 export const guides: Guide[] = [
  {
+  slug:'how-to-remove-an-image-background',title:'How to remove an image background and refine the edges',description:'Choose a suitable source image, inspect your cutout and save a transparent PNG for another layout.',updated:'2026-11-21',category:'Image editing',related:['resize-image','compress-image','png-to-webp'],
+  sections:[
+   {heading:'Choose an image with a clear subject',paragraphs:['Start with the original photo if you have it. A clearly separated subject against a simple background is usually easier to isolate. Hair, transparent objects and shadows can blend into the surroundings, so look closely at those areas in the result.']},
+   {heading:'Inspect the cutout at full size',paragraphs:['Open Remove Background, choose an image and run the automatic removal. Zoom into the outline to find missing details or background left around the subject. Use Restore to bring back a missing area and Erase to clean up the edge. Work with small strokes near narrow details.']},
+   {heading:'Save and check the transparent image',paragraphs:['Export a PNG to keep transparency. Place it on both light and dark backgrounds to reveal bright outlines, dark halos or stray pixels. Keep the original photo so you can make a different cutout later.']}
+  ]
+ },
+
+ {
   slug:'how-to-compress-pdf-without-losing-readability',title:'How to compress a PDF and keep it readable',description:'Understand why PDFs become large, which compression setting to choose, and what to check before sharing the output.',updated:'2026-11-12',category:'PDF optimization',related:['compress-pdf','pdf-to-jpg','split-pdf'],
   sections:[
    {heading:'Why a PDF becomes large',paragraphs:['Photographs and scans are often the biggest source of PDF file size. A document made mostly from text can be relatively small, while a scanned packet of the same number of pages may be much larger because every page contains an image. Embedded fonts, illustrations and repeated graphics can add further weight.','Compression is not a single operation that behaves identically on every PDF. The available reductions depend on how the source was generated, how much image detail it contains and whether it was optimized previously.']},

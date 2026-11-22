@@ -1,3 +1,8 @@
-import AuthForm from '@/components/AuthForm';
-export const metadata={title:'Sign in'};
-export default function Login(){return <AuthForm type="login"/>}
+﻿import AuthForm from '@/components/AuthForm';
+import AuthShell from '@/components/AuthShell';
+
+export const metadata={title:'Log in'};
+
+export default function Login(){
+  return <AuthShell title="Welcome back" description="Log in to your FileCraft workspace."><AuthForm type="login"/></AuthShell>;
+}

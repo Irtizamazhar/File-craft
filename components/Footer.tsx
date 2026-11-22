@@ -1,8 +1,20 @@
 import Link from 'next/link';
 import Brand from './Brand';
-export default function Footer(){return <footer className="footer"><div className="container footer-grid">
-<div className="footer-intro"><Brand/><p>Everything your documents need. Simple tools, thoughtful design, and on-device file processing.</p><div className="footer-tag">Built for better workflows</div></div>
-<div><h4>Tools</h4><Link href="/tools">Explore all tools</Link><Link href="/pdf-tools">PDF tools</Link><Link href="/document-tools">Document tools</Link><Link href="/image-tools">Image tools</Link></div>
-<div><h4>Company</h4><Link href="/about">About FileCraft</Link><Link href="/pricing">Pricing</Link><Link href="/features">Features</Link><Link href="/faq">FAQ</Link><Link href="/contact">Contact</Link><Link href="/blog">Helpful guides</Link></div>
-<div><h4>Legal</h4><Link href="/security">Security</Link><Link href="/cookies">Cookie information</Link><Link href="/privacy">Privacy</Link><Link href="/terms">Terms</Link></div>
-</div><div className="container footer-bottom"><span>© {new Date().getFullYear()} FileCraft. All rights reserved.</span><span>Made to make work easier.</span></div></footer>}
+
+const navigation=[
+  {title:'Tools',links:[['All tools','/tools'],['PDF tools','/pdf-tools'],['Document tools','/document-tools'],['Image tools','/image-tools']]},
+  {title:'Product',links:[['Features','/features'],['Pricing','/pricing'],['Edit PDF','/edit-pdf'],['Remove Background','/remove-background']]},
+  {title:'Resources',links:[['Helpful guides','/blog'],['Frequently asked questions','/faq']]},
+  {title:'Company',links:[['About FileCraft','/about'],['Contact','/contact']]},
+  {title:'Legal',links:[['Security','/security'],['Cookie information','/cookies'],['Privacy','/privacy'],['Terms','/terms']]},
+];
+
+export default function Footer(){
+  return <footer className="footer">
+    <nav className="container footer-grid" aria-label="Footer">
+      <div className="footer-intro"><Brand/><p>Browser-based tools for PDFs, documents and images.</p></div>
+      {navigation.map(({title,links})=><div key={title}><h2>{title}</h2>{links.map(([label,href])=><Link href={href} key={href}>{label}</Link>)}</div>)}
+    </nav>
+    <div className="container footer-bottom"><span>© {new Date().getFullYear()} FileCraft. All rights reserved.</span></div>
+  </footer>;
+}

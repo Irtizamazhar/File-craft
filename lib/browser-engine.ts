@@ -29,6 +29,17 @@ async function pdfJs(file:File){const pdfjs=await import('pdfjs-dist');pdfjs.Glo
 async function pageText(doc:any,pageNo:number):Promise<string>{const page=await doc.getPage(pageNo);const content=await page.getTextContent();const byLine=new Map<number,{x:number;s:string}[]>();for(const item of content.items as any[]){if(typeof item.str!=='string')continue;const y=Math.round(item.transform?.[5]||0);const arr=byLine.get(y)||[];arr.push({x:item.transform?.[4]||0,s:item.str});byLine.set(y,arr)}return [...byLine.entries()].sort((a,b)=>b[0]-a[0]).map(([,line])=>line.sort((a,b)=>a.x-b.x).map(t=>t.s).join(' ')).join('\n')}
 async function allText(file:File):Promise<string>{const doc=await pdfJs(file);try{const out:string[]=[];for(let i=1;i<=doc.numPages;i++)out.push(await pageText(doc,i));return out.join('\n\n')}finally{await doc.destroy()}}
 async function render(doc:any,pageNo:number,scale=1.4):Promise<HTMLCanvasElement>{const page=await doc.getPage(pageNo);const viewport=page.getViewport({scale});ensure(viewport.width*viewport.height<=14_000_000,'This page is too large to render safely.');const canvas=document.createElement('canvas');canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);const ctx=canvas.getContext('2d',{willReadFrequently:true});ensure(ctx,'Unable to create image canvas.');await page.render({canvasContext:ctx,canvas,viewport,background:'rgb(255,255,255)'} as any).promise;return canvas}
+export async function previewPdf(file:File){
+  const doc=await pdfJs(file);
+  try {
+    const page=await doc.getPage(1);
+    const {width,height}=page.getViewport({scale:1});
+    const canvas=await render(doc,1,Math.min(1,420/Math.max(width,height)));
+    return {src:canvas.toDataURL(),width:canvas.width,height:canvas.height};
+  } finally {
+    await doc.destroy();
+  }
+}
 const canvasBlob=(canvas:HTMLCanvasElement,mime:string,quality=0.86)=>new Promise<Blob>((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('Image export failed.')),mime,quality));
 async function fileCanvas(file:File):Promise<HTMLCanvasElement>{const image=await createImageBitmap(file);try{ensure(image.width*image.height<25_000_000,'Image dimensions exceed the safe limit.');const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;const ctx=canvas.getContext('2d');ensure(ctx,'Canvas unavailable');ctx.drawImage(image,0,0);return canvas}finally{image.close()}}
 async function pngData(file:File):Promise<Uint8Array>{if(/\.(png)$/i.test(file.name))return bytesOf(file);const c=await fileCanvas(file);return new Uint8Array(await (await canvasBlob(c,'image/png')).arrayBuffer())}

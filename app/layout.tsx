@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './design-system.css';
 import './advanced.css';
+import './premium.css';
+import './account-entry.css';
 import Header from '@/components/Header';
 import ContentAds from '@/components/ContentAds';
 import Footer from '@/components/Footer';

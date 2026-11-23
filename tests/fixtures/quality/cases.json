@@ -1,0 +1,16 @@
+{
+  "license": "https://unsplash.com/license",
+  "note": "Background-removal quality set. Photographs from images.unsplash.com (w=1200, q=90). No ground-truth masks: compare cutouts visually with scripts/bg-quality.mjs.",
+  "cases": [
+    {"name": "car-road-sunset", "file": "tests/fixtures/quality/car-road-sunset.jpg", "category": "Car on a road with a sunset sky", "unsplash": "1580273916550-e323be2ae537"},
+    {"name": "car-road-sky", "file": "tests/fixtures/quality/car-road-sky.jpg", "category": "Car on a road with sky and palms", "unsplash": "1555215695-3004980ad54e"},
+    {"name": "car-garage", "file": "tests/fixtures/quality/car-garage.jpg", "category": "Car in a dark garage with other cars", "unsplash": "1492144534655-ae79c964c9d7"},
+    {"name": "person-hair", "file": "tests/fixtures/quality/person-hair.jpg", "category": "Person with loose, flyaway hair", "unsplash": "1488426862026-3ee34a7d66df"},
+    {"name": "person-hair-long", "file": "tests/fixtures/quality/person-hair-long.jpg", "category": "Person with long hair, outdoor background", "unsplash": "1544005313-94ddf0286df2"},
+    {"name": "person-holding", "file": "tests/fixtures/quality/person-holding.jpg", "category": "Person holding objects (shopping bags)", "unsplash": "1483985988355-763728e1935b"},
+    {"name": "product-plain", "file": "tests/fixtures/quality/product-plain.jpg", "category": "Product on a plain background", "unsplash": "1585386959984-a4155224a1ad"},
+    {"name": "product-busy", "file": "tests/fixtures/quality/product-busy.jpg", "category": "Product on a busy background", "unsplash": "1556228578-8c89e6adf883"},
+    {"name": "animal", "file": "tests/fixtures/objects/animal.jpg", "category": "Animal", "unsplash": "1517849845537-4d257902454a"},
+    {"name": "laptop-closeup", "file": "tests/fixtures/objects/electronics.jpg", "category": "Laptop close-up (previous failure)", "unsplash": "1517336714731-489689fd1ca8"}
+  ]
+}

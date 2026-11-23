@@ -1,7 +1,8 @@
 import {mkdir,copyFile,access,readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 await mkdir('public/engines',{recursive:true});await mkdir('public/licenses',{recursive:true});
-for(const name of ['ort-wasm-simd-threaded.wasm','ort-wasm-simd-threaded.mjs'])await copyFile('node_modules/onnxruntime-web/dist/'+name,'public/engines/'+name);
+// The plain build serves the WASM (CPU) backend; the asyncify build serves onnxruntime-web/webgpu.
+for(const name of ['ort-wasm-simd-threaded.wasm','ort-wasm-simd-threaded.mjs','ort-wasm-simd-threaded.asyncify.wasm','ort-wasm-simd-threaded.asyncify.mjs'])await copyFile('node_modules/onnxruntime-web/dist/'+name,'public/engines/'+name);
 await copyFile('node_modules/@embedpdf/pdfium/dist/pdfium.wasm','public/engines/pdfium.wasm');
 await copyFile('node_modules/@embedpdf/pdfium/LICENSE','public/licenses/EmbedPDF-MIT.txt');
 await copyFile('node_modules/@embedpdf/pdfium/LICENSE.pdfium','public/licenses/PDFium-LICENSE.txt');

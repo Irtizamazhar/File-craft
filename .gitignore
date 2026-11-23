@@ -31,3 +31,8 @@ public/engines/
 
 # Large general-object weights are installed from a pinned, checksummed source.
 public/models/birefnet-lite-512.onnx
+
+# Background-removal service: local virtualenv, caches and the large BiRefNet weights (downloaded by download_model.py).
+services/background-removal/.venv/
+services/background-removal/models/
+services/background-removal/**/__pycache__/

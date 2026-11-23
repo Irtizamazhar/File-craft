@@ -5,3 +5,7 @@ astronaut.png is the NASA astronaut Eileen Collins portrait distributed by sciki
 ## General-object photographs
 
 The JPEG files in objects/ were downloaded from images.unsplash.com under the [Unsplash License](https://unsplash.com/license) for local QA. Original photo identifiers and request settings are recorded in objects/sources.json and scripts/setup-object-fixtures.mjs. They are photographs, not AI-generated test shapes; they are not model-training data or pixel-accurate ground-truth masks. Jewelry shows jewelry worn by a person, and bottle is opaque. The plain-watch photograph contains two watches and is also used for separate-subject selection. The exact user-supplied failing watch was not available. Preserve this attribution when copying fixtures.
+
+## Background-removal quality set
+
+The JPEG files in quality/ were downloaded from images.unsplash.com (w=1200, q=90) under the [Unsplash License](https://unsplash.com/license) to compare background-removal engines. quality/cases.json lists each photo identifier and the test category; animal and laptop-closeup reuse objects/animal.jpg and objects/electronics.jpg. They have no ground-truth masks: run `node scripts/bg-quality.mjs` and judge the cutouts visually.

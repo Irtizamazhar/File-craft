@@ -7,6 +7,24 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  // Run the host redirect before the existing trailing-slash normalization.
+  skipTrailingSlashRedirect: true,
+  async redirects() {
+    return [
+      {
+        source: '/:path(.*)',
+        has: [{ type: 'host', value: 'editgoo\\.com' }],
+        destination: 'https://www.editgoo.com/:path',
+        permanent: true,
+      },
+      {
+        source: '/:path+/',
+        destination: '/:path+',
+        permanent: true,
+      },
+    ];
+  },
+
   async headers() {
     return [
       {

@@ -5,7 +5,7 @@
  * The previous layouts (components/ToolProcessor.tsx and the classic advanced tool layouts) stay in the code base
  * as the fallback, so switching back needs no other change.
  */
-export const WORKSPACE_TOOLS:readonly string[]=['merge-pdf','remove-background','split-pdf','compress-pdf','rotate-pdf','extract-pdf-pages','delete-pdf-pages','add-page-numbers','watermark-pdf','crop-pdf','grayscale-pdf','pdf-to-text','text-to-pdf','pdf-to-jpg','pdf-to-png','jpg-to-pdf','png-to-pdf','pdf-to-word'];
+export const WORKSPACE_TOOLS:readonly string[]=['merge-pdf','remove-background','split-pdf','compress-pdf','rotate-pdf','extract-pdf-pages','delete-pdf-pages','add-page-numbers','watermark-pdf','crop-pdf','grayscale-pdf','pdf-to-text','text-to-pdf','pdf-to-jpg','pdf-to-png','jpg-to-pdf','png-to-pdf','pdf-to-word','pdf-to-excel'];
 
 export function usesWorkspace(slug:string){
   return process.env.NEXT_PUBLIC_ONE_STEP_WORKSPACE!=='off'&&WORKSPACE_TOOLS.includes(slug);

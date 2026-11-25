@@ -4,6 +4,7 @@ import './design-system.css';
 import './advanced.css';
 import './premium.css';
 import './account-entry.css';
+import './account-ui.css';
 import Header from '@/components/Header';
 import ContentAds from '@/components/ContentAds';
 import Footer from '@/components/Footer';

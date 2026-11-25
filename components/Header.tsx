@@ -3,8 +3,11 @@
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
 import {useCallback,useEffect,useRef,useState,type PointerEvent} from 'react';
-import {Menu,X,ChevronDown,ArrowRight} from 'lucide-react';
+import {Menu,X,ChevronDown,ArrowRight,Zap} from 'lucide-react';
 import Brand from './Brand';
+import AccountMenu from './header/AccountMenu';
+import NotificationBell from './header/NotificationBell';
+import {isPaid,useSession} from '@/lib/session-client';
 
 const menus=[
   {label:'All tools',links:[['All tools','/tools'],['Remove Background','/remove-background'],['File Compressor','/file-compressor'],['Word & documents','/document-tools'],['Images','/image-tools']]},
@@ -26,6 +29,8 @@ export default function Header(){
   const root=useRef<HTMLElement>(null);
   const closeTimer=useRef<number|undefined>(undefined);
   const pressedTrigger=useRef<Element|null>(null);
+  const session=useSession();
+  const user=session.status==='user'?session.user:null;
 
   const cancelClose=useCallback(()=>{
     window.clearTimeout(closeTimer.current);
@@ -94,7 +99,11 @@ export default function Header(){
     },200);
   }
 
-  return <header className="site-header" ref={root}
+  const menuButton=<button className="mobile-menu" type="button" aria-label={open?'Close navigation':'Open navigation'}
+    aria-expanded={open} aria-controls="main-navigation" onClick={()=>open?dismiss():setOpen(true)}>
+    {open?<X aria-hidden="true"/>:<Menu aria-hidden="true"/>}
+  </button>;
+  return <header className={'site-header'+(user?' is-signed-in':'')} ref={root}
     onMouseDownCapture={event=>{pressedTrigger.current=(event.target as Element).closest('.nav-dropdown > button')}}
     onMouseUpCapture={()=>{pressedTrigger.current=null}}
     onPointerCancel={()=>{pressedTrigger.current=null}}
@@ -103,10 +112,7 @@ export default function Header(){
   }}>
     <div className="container header-inner">
       <Brand/>
-      <button className="mobile-menu" type="button" aria-label={open?'Close navigation':'Open navigation'}
-        aria-expanded={open} aria-controls="main-navigation" onClick={()=>open?dismiss():setOpen(true)}>
-        {open?<X aria-hidden="true"/>:<Menu aria-hidden="true"/>}
-      </button>
+      {!user&&menuButton}
       <nav id="main-navigation" className={'site-nav '+(open?'open':'')} aria-label="Main navigation">
         {menus.map(item=>{
           const id=panelId(item.label);
@@ -146,9 +152,17 @@ export default function Header(){
         })}
         <Link className={pathname==='/features'?'current':''} href="/features">Features</Link>
         <Link className={pathname==='/pricing'?'current':''} href="/pricing">Pricing</Link>
-        <div className="mobile-auth"><Link href="/login">Log in</Link><Link href="/register" className="btn btn-primary">Get started</Link></div>
+        {session.status==='guest'&&<div className="mobile-auth"><Link href="/login">Log in</Link><Link href="/register" className="btn btn-primary">Get started</Link></div>}
       </nav>
-      <div className="nav-actions"><Link href="/login" className="nav-login">Log in</Link><Link href="/register" className="btn btn-primary btn-nav">Get started</Link></div>
+      {/* While the session is read, a small placeholder instead of a flash of "Log in / Get started". */}
+      {session.status==='loading'&&<div className="acct-skeleton" aria-hidden="true"><span/><span/></div>}
+      {session.status==='guest'&&<div className="nav-actions"><Link href="/login" className="nav-login">Log in</Link><Link href="/register" className="btn btn-primary btn-nav">Get started</Link></div>}
+      {user&&<div className="acct-actions">
+        {!isPaid(user)&&<Link href="/pricing" className="acct-upgrade"><Zap size={15} aria-hidden="true"/><span className="acct-upgrade-label">Upgrade</span></Link>}
+        <NotificationBell/>
+        {menuButton}
+        <AccountMenu user={user} onOpen={dismiss}/>
+      </div>}
     </div>
   </header>;
 }

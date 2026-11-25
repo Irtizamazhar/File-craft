@@ -5,6 +5,7 @@ import {useRouter} from 'next/navigation';
 import Link from 'next/link';
 import {Eye,EyeOff,LoaderCircle,TriangleAlert} from 'lucide-react';
 import {request} from '@/lib/api';
+import {announceSession} from '@/lib/session-client';
 
 type Field='name'|'email'|'password'|'confirmPassword'|'consent';
 type Values=Record<Field,string>;
@@ -79,6 +80,7 @@ export default function AuthForm({type}:{type:'login'|'register'}){
     setError('');
     try{
       await request('/auth/'+type,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      announceSession();// the header switches to the signed-in view without a reload
       router.replace('/dashboard');
       router.refresh();
     }catch(failure){

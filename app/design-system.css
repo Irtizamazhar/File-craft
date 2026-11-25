@@ -1,5 +1,5 @@
 
-/* FileCraft approved visual system: one vocabulary across public and account screens. */
+/* Editgoo approved visual system: one vocabulary across public and account screens. */
 :root{--coral:#f04457;--coral-dark:#d52e43;--ink:#11182e;--navy:#11182e;--muted:#586074;--blush:#fcecef;--lavender:#eee7ff;--success:#16813b;--line:#e8dfe5;--radius:18px;--shadow:0 12px 28px #34223d09;--space-page:clamp(40px,6vw,88px)}
 body{background:#fff;font-family:Inter,'Segoe UI',Arial,sans-serif;color:var(--ink)}
 .container{width:min(1360px,calc(100% - 96px))}h1,h2,h3{letter-spacing:-.045em;font-weight:800}p{color:var(--muted)}
@@ -23,6 +23,12 @@ body{background:#fff;font-family:Inter,'Segoe UI',Arial,sans-serif;color:var(--i
 .workspace-grid{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:22px;align-items:start}.workspace-options{background:#fff8fb;border:1px solid #ede1eb;border-radius:14px;padding:18px}.workspace-options h3{font-size:19px;margin:0 0 21px}.workspace-options .option-field{margin-bottom:16px}.workspace-options input,.workspace-options select{width:100%;min-width:0}.workspace-options .output-label{margin-top:0}.option-help{font-size:11px;line-height:1.6;color:#606278;margin:3px 0 0}.workspace-options .process-button{font-size:13px;padding:12px;margin-top:20px}.workspace-files{min-width:0}.workspace-options{min-width:0}.workspace-grid .selected-file{flex-wrap:wrap}.workspace-grid .selected-file>div:not(.file-order-buttons){min-width:70px}.workspace-grid .selected-file strong{font-size:11px}.workspace-grid .file-order-buttons{margin-left:auto}.workspace-grid .selected-file button{min-width:32px;min-height:36px}.workspace-grid .tool-drop strong{font-size:18px}.workspace-grid .tool-drop small{font-size:10px}.result-meta{margin:0}@media(max-width:1150px){.workspace-grid{grid-template-columns:1fr}.workspace-options .process-button{font-size:15px}}@media(min-width:901px){.tool-layout{grid-template-columns:minmax(0,1fr) 270px;gap:22px}}
 
 .tool-search{flex-shrink:0;min-height:47px}@media(max-width:900px){.tool-search{flex-basis:auto}}
+
+/* Editgoo logo: ribbon icon + full-colour wordmark (PNG); em sizes follow the .brand font-size breakpoints */
+.brand-logo{display:block;flex:none;height:1.3em;width:auto}.brand-wordmark{display:block;flex:none;height:1em;width:auto}
+
+/* Content and policy pages */
+.subpage-hero p.page-updated{margin-top:14px;font-size:13px;font-weight:650;color:#6b7280}.article-list article>div{min-width:0}.article-list article p+p{margin-top:12px}.article-list ul{margin:12px 0 0;padding-left:20px;color:#515b70;font-size:16px;line-height:1.65}.article-list li+li{margin-top:6px}@media(max-width:540px){.article-list ul{font-size:14px}}.subpage-hero p a{color:#c81e45;text-decoration:underline;text-underline-offset:3px}
 
 .saved-tool-controls{display:flex;align-items:flex-end;gap:15px;flex-wrap:wrap}.saved-tool-controls .option-field{flex:1;max-width:400px;min-width:160px}.saved-tools ul{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:10px}.saved-tools li{display:flex;align-items:center;gap:4px;border:1px solid #e2d5e2;border-radius:10px;background:white;padding:4px}.saved-tools li a{display:flex;align-items:center;gap:12px;padding:8px 10px;font-size:14px}.saved-tools li button{display:grid;place-items:center;min-width:40px;min-height:40px;border:0;border-radius:8px;background:#fff1f5;color:#9d2c44}
 

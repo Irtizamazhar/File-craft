@@ -123,6 +123,6 @@ export default function AuthForm({type}:{type:'login'|'register'}){
         {busy?<><LoaderCircle size={19} className="spin" aria-hidden="true"/>{register?'Creating account…':'Logging in…'}</>:register?'Create account':'Log in'}
       </button>
     </form>
-    <p className="entry-switch">{register?<>Already have an account? <Link href="/login">Log in</Link></>:<>New to FileCraft? <Link href="/register">Create an account</Link></>}</p>
+    <p className="entry-switch">{register?<>Already have an account? <Link href="/login">Log in</Link></>:<>New to Editgoo? <Link href="/register">Create an account</Link></>}</p>
   </>;
 }

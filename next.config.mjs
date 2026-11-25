@@ -50,6 +50,10 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
           },
+          // HTTPS-only in production (browsers ignore it on plain-HTTP localhost). No includeSubDomains/preload.
+          ...(process.env.NODE_ENV === 'production'
+            ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000' }]
+            : []),
         ],
       },
     ];

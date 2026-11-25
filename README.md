@@ -1,4 +1,6 @@
-# FileCraft
+# Editgoo (formerly FileCraft)
+Public brand: **Editgoo** — https://www.editgoo.com. Internal identifiers (package name, `filecraft` database, `fc_session` cookie, localStorage and cache keys) keep their original names for compatibility. Brand assets are generated from `docs/brand/editgoo-logo-source.png` with `node scripts/brand-assets.mjs`.
+
 Existing Next.js App Router + React + TypeScript + mysql2/promise application. The approved coral/navy/blush/lavender design is applied across public, tool, account and system screens. All existing tool routes and database records are retained.
 
 ## Windows startup

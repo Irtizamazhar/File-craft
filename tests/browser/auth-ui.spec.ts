@@ -27,7 +27,7 @@ test('Get started opens signup and recovery points to real help',async({page,isM
   await page.getByRole('link',{name:'Forgot password?'}).click();
   await expect(page.getByRole('heading',{name:'Forgot your password?'})).toBeVisible();
   await expect(page.getByText('Password reset emails are currently unavailable.')).toBeVisible();
-  await expect(page.getByRole('link',{name:'Contact FileCraft'})).toHaveAttribute('href','/contact');
+  await expect(page.getByRole('link',{name:'Contact Editgoo'})).toHaveAttribute('href','/contact');
   expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa']).analyze()).violations.map(v=>v.id)).toEqual([]);
   await page.getByRole('link',{name:'Back to log in'}).click();
   await expect(page).toHaveURL(/\/login$/);

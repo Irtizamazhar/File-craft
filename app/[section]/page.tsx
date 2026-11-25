@@ -1,52 +1,55 @@
-export const dynamicParams=false;
 import type {Metadata} from 'next';
 import Link from 'next/link';
 import {notFound} from 'next/navigation';
-import {ArrowRight,ShieldCheck,Mail,CheckCircle2} from 'lucide-react';
 import ToolCatalog from '@/components/ToolCatalog';
 import Pricing from '@/components/Pricing';
-import Faq from '@/components/Faq';
+import Faq, {siteQuestions} from '@/components/Faq';
 import ContactForm from '@/components/ContactForm';
 import {guides} from '@/lib/guides';
-import {businessName, publicContact} from '@/lib/site';
-const sections:any={
- 'edit-pdf':{title:'Your PDF. A few thoughtful changes.',category:'Edit PDF',subtitle:'Add a watermark, fill supported forms, adjust pages or update metadata. Full text and image editing is not supported.'},
- 'convert-tools':{title:'A fresh format. A simpler task.',category:'Convert',subtitle:'Convert supported PDF, document and image formats with clear limitations.'},
- 'pdf-tools':{title:'Every PDF task, simplified.',category:'PDF',subtitle:'Merge, split, rotate and arrange PDF files without the fuss.'},
- 'document-tools':{title:'Documents, your way.',category:'Document',subtitle:'Convert Word documents, spreadsheets, slides and more.'},
- 'image-tools':{title:'Images that fit the job.',category:'Image',subtitle:'Convert, resize and optimize images in your browser.'}
-};
-export function generateStaticParams(){return ['pdf-tools','document-tools','image-tools','pricing','about','contact','faq','blog','privacy','terms','security','features','cookies','convert-tools'].map(section=>({section}))}
-export async function generateMetadata({params:pendingParams}:{params:Promise<{section:string}>}):Promise<Metadata> {const params=await pendingParams;const s=sections[params.section]; const title=s?.title||params.section.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());return {title,description:s?.subtitle||('Explore FileCraft '+title.toLowerCase()+'.'),alternates:{canonical:'/'+params.section}};}
-export default async function Section({params:pendingParams}:{params:Promise<{section:string}>}){const params=await pendingParams;
- const id=params.section;
- if(sections[id]){const s=sections[id];return <><section className="subpage-hero"><div className="container"><span className="eyebrow">FILECRAFT / {s.category.toUpperCase()}</span><h1>{s.title}</h1><p>{s.subtitle}</p></div></section><ToolCatalog heading={false} initial={s.category}/></>}
- if(id==='pricing')return <Pricing/>;
- if(id==='faq')return <><section className="subpage-hero"><div className="container"><span className="eyebrow">A LITTLE CLARITY</span><h1>Good questions. Clear answers.</h1><p>Get to know your FileCraft workspace.</p></div></section><Faq/></>;
- if(id==='blog')return <><section className="subpage-hero"><div className="container"><span className="eyebrow">FILECRAFT GUIDES</span><h1>Practical document guides.</h1><p>Original walkthroughs, format choices and simple checks to make your file work easier.</p></div></section><section className="simple-section"><div className="container guide-index">{guides.map(g=><Link key={g.slug} href={'/guides/'+g.slug}><span className="eyebrow">{g.category}</span><h2>{g.title}</h2><p>{g.description}</p><span className="inline-link">Read guide →</span></Link>)}</div></section></>;
- if(id==='contact')return <><section className="subpage-hero"><div className="container"><span className="eyebrow">SAY HELLO</span><h1>Let’s talk files.</h1><p>Questions, suggestions, or partnership ideas? Send a note.</p></div></section><div className="container simple-section narrow"><ContactForm/></div></>;
- const content:any={
-  'features':{title:'Less file work. More possibilities.',subtitle:'A thoughtful workspace for the documents in your day.',blocks:[['Everything has its place','Search the tool directory, filter by category and open the tool that fits your next task.'],['Your files, your device','Supported document operations run in your browser. File contents are not uploaded to the FileCraft backend.'],['A workflow that makes sense','Select files, arrange supported inputs, adjust relevant options and download the result. Each tool explains its limitations.'],['A little context when you need it','Original guides and practical tool instructions help you choose formats and review your outputs.'],['A workspace for your account','Sign in for your reported activity, current plan, profile and password settings. Document downloads remain on your device.']]},
-  'cookies':{title:'Small cookies. Clear choices.',subtitle:'How FileCraft uses browser storage.',blocks:[['Essential sign-in cookie','The HttpOnly fc_session cookie keeps you signed in. Signing out removes the browser cookie and revokes the session. It expires after 14 days unless revoked earlier.'],['Your selected files','Homepage file selections are held temporarily in browser memory to hand them to your chosen tool. They are not stored in localStorage or sent to the server.'],['Saved tool shortcuts','If you save tools in your dashboard, the chosen tool IDs are stored in localStorage in this browser. These preferences contain no document contents and do not sync between devices.'],['Advertising and analytics','No analytics tracker is currently implemented. Advertising remains disabled unless the operator configures approval and certified consent management. A homemade preference banner is not a substitute for a certified CMP.'],['Managing cookies','You can sign out to remove your session cookie or clear site data through your browser. Blocking essential cookies prevents authenticated account features.']]},
-  'about':{title:'File work, made lighter.',subtitle:'We believe everyday document tools should be simple.',blocks:[['Why we exist','FileCraft brings practical file conversion and editing tools together behind one easy interface.'],['How we build','We focus on actual file processing, clear limitations, and a user experience that gets out of your way.'],['What comes next','We plan to improve format fidelity, performance and team features as we validate each tool.']]},
-  'faq':{title:'A few good questions.',subtitle:'Here are the essentials.',blocks:[['Are the tools actually working?','The listed tools process files locally within your browser. Some conversions have format-specific limitations; see each tool page.'],['How long do you keep files?','Your document files are processed on your device, not uploaded to our site. Generated download links are temporary within your open browser tab.'],['Do I need an account?','You can use tools without signing in. Accounts store optional tool usage history, not copies of the processed documents.'],['Does PDF to Word preserve every element?','No. Text-based extraction generates editable DOCX; exact original layout is not preserved.'],['Can I recover expired downloads?','Download generated outputs to your device before closing the tab. The site cannot recover outputs after closing the tab.']]},
-  'blog':{title:'Notes from the toolbox.',subtitle:'Practical tips for everyday documents.',blocks:[['A quick guide to smaller PDFs','Try compression when sending bulky PDFs. Some already-optimized PDFs will not shrink much.'],['What is OCR?','Optical character recognition makes text in scanned pages searchable. It may require correction for difficult scans.'],['Choosing between DOCX and PDF','Use DOCX when editing matters and PDF when consistent sharing matters.']]},
-  'security':{title:'Your files deserve care.',subtitle:'Security matters when documents are involved.',blocks:[['Private file access','Your input file bytes are not uploaded for the supported on-device tools. Account details and optional tool activity use MySQL.'],['Automatic removal','Document conversion happens in the browser. We do not store uploaded document contents on the website server.'],['Important deployment note','Operators must use HTTPS, secure account infrastructure, rate limiting, monitoring, and a security review before public launch.'],['No false promises','This application has not undergone an independent security audit. A public release requires operational security verification.']]},
-  'privacy':{title:'Privacy and file handling.',subtitle:'How this website handles your files and account information.',blocks:[
-  ['Service operator',`This service is operated by ${businessName||'an operator who has not yet published their name'}. Privacy inquiries: ${publicContact||'contact email not configured'}.`],
-  ['Your document files','The listed tools process source files locally in your browser. The source files and generated downloads are not sent to the FileCraft backend. Save outputs on your own device before closing the tab.'],
-  ['Account information and cookies','If you register, the service stores your name, email, salted password hash and a hashed session token in MySQL. An essential cookie keeps you signed in. If you use tools while signed in, a tool name and timestamp may be recorded without a document file or filename.'],
-  ['Browser preferences','Saved tool shortcuts use localStorage to remember tool IDs on this device. Document files are not stored in those preferences.'],
-  ['Contact messages and retention','Messages submitted through the contact form are saved in MySQL with the provided name, email and message. They remain until the operator deletes them. To request access or removal, contact the service operator.'],
-  ['Advertising and consent','If Google AdSense is enabled, Google may process information under its own policies. The operator is responsible for accurate advertising disclosures and compliant consent management where required.'],
-  ['Policy accuracy','The operator must review and complete this policy to match the actual business, third-party services, location and applicable privacy laws before public launch.']]},
-  'terms':{title:'Terms of use.',subtitle:'Terms for using the available online tools.',blocks:[
-  ['Service operator',`FileCraft is provided by ${businessName||'the site operator'}. Contact: ${publicContact||'not configured'}.`],
-  ['Acceptable use','Only process files you own or have permission to use. You are responsible for complying with applicable laws and respecting intellectual property rights.'],
-  ['Conversion accuracy','File processing can alter formatting, metadata, graphics or document structure. Review all outputs before relying on them for important purposes.'],
-  ['Limitations','Tools have documented browser/file-size/format limitations and cannot guarantee success for arbitrary inputs. The operator must review these terms before public commercial launch.']]}
+import {catalogSections,contentPages,sectionIds,isSection} from '@/lib/site-pages';
+import {pageMetadata} from '@/lib/seo';
 
- };
- const c=content[id];if(!c)notFound();
- return <><section className="subpage-hero"><div className="container"><span className="eyebrow">FILECRAFT</span><h1>{c.title}</h1><p>{c.subtitle}</p></div></section><section className="simple-section"><div className="container article-list">{c.blocks.map(([title,text]:[string,string],i:number)=><article key={title}><span className="article-number">0{i+1}</span><div><h2>{title}</h2><p>{text}</p></div></article>)}</div></section></>;
+// Unknown sections render on demand and resolve to the 404 page through notFound().
+// (dynamicParams=false made unknown paths throw NoFallbackError during ISR revalidation.)
+export const dynamicParams=true;
+
+type Props={params:Promise<{section:string}>};
+
+const componentMeta:Record<string,{title:string;description:string}>={
+  pricing:{title:'Pricing',description:'Editgoo plans: the free plan and its limits. Paid plans are not available yet.'},
+  contact:{title:'Contact us',description:'Send the Editgoo team a question, suggestion or problem report.'},
+  faq:{title:'Frequently asked questions',description:'Answers about Editgoo tools, file privacy, limits, accounts and output quality.'},
+  blog:{title:'Guides',description:'Original Editgoo guides for working with PDFs, documents and images.'},
+};
+
+export function generateStaticParams(){
+  // Always a non-empty, static list; nothing here depends on a network or database call.
+  return sectionIds.map(section=>({section}));
+}
+
+export async function generateMetadata({params}:Props):Promise<Metadata>{
+  const {section}=await params;
+  if(!isSection(section))notFound();
+  const canonical='/'+section;
+  const catalog=catalogSections[section],page=contentPages[section],component=componentMeta[section];
+  const title=catalog?.title||page?.metaTitle||component.title;
+  const description=catalog?.subtitle||page?.description||component.description;
+  return pageMetadata({title,description,path:canonical});
+}
+
+export default async function Section({params}:Props){
+  const {section:id}=await params;
+  if(!isSection(id))notFound();
+
+  const catalog=catalogSections[id];
+  if(catalog)return <><section className="subpage-hero"><div className="container"><span className="eyebrow">{catalog.eyebrow}</span><h1>{catalog.title}</h1><p>{catalog.subtitle}</p></div></section><ToolCatalog heading={false} initial={catalog.category}/></>;
+  if(id==='pricing')return <Pricing/>;
+  if(id==='faq')return <><section className="subpage-hero"><div className="container"><span className="eyebrow">FAQ</span><h1>Good questions. Clear answers.</h1><p>The essentials about Editgoo tools, your files and your account. For step-by-step help, see the <Link href="/help">help centre</Link>.</p></div></section><Faq items={siteQuestions}/></>;
+  if(id==='blog')return <><section className="subpage-hero"><div className="container"><span className="eyebrow">EDITGOO GUIDES</span><h1>Practical file guides.</h1><p>Original walkthroughs, format choices and simple checks to make your file work easier.</p></div></section><section className="simple-section"><div className="container guide-index">{guides.map(g=><Link key={g.slug} href={'/guides/'+g.slug}><span className="eyebrow">{g.category}</span><h2>{g.title}</h2><p>{g.description}</p><span className="inline-link">Read guide →</span></Link>)}</div></section></>;
+  if(id==='contact')return <><section className="subpage-hero"><div className="container"><span className="eyebrow">CONTACT US</span><h1>Let’s talk files.</h1><p>Questions, suggestions or a problem with a tool? Send us a message. Please do not include passwords or confidential documents.</p></div></section><div className="container simple-section narrow"><ContactForm/></div></>;
+
+  const page=contentPages[id];
+  if(!page)notFound();
+  return <><section className="subpage-hero"><div className="container"><span className="eyebrow">{page.eyebrow}</span><h1>{page.title}</h1><p>{page.subtitle}</p>{page.updated&&<p className="page-updated">Last updated: {page.updated}</p>}</div></section>
+  <section className="simple-section"><div className="container article-list">{page.blocks.map((block,i)=><article key={block.heading}><span className="article-number">{String(i+1).padStart(2,'0')}</span><div><h2>{block.heading}</h2>{block.paragraphs.map(text=><p key={text}>{text}</p>)}{block.list&&<ul>{block.list.map(item=><li key={item}>{item}</li>)}</ul>}</div></article>)}</div></section></>;
 }

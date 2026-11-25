@@ -13,7 +13,7 @@ import {directoryTools, popularSlugs} from '@/lib/directory';
 import {guides} from '@/lib/guides';
 
 export const metadata={
-  description:'Edit and organize PDFs, remove image backgrounds, compress files and convert documents with FileCraft’s browser-based tools.',
+  description:'Edit and organize PDFs, remove image backgrounds, compress files and convert Office documents and images with Editgoo’s free online tools. Most tools run in your browser.',
   alternates:{canonical:'/'}
 };
 
@@ -48,14 +48,14 @@ export default function Home(){
         <div className="hero-content">
           <span className="hero-eyebrow">YOUR ALL-IN-ONE FILE WORKSPACE</span>
           <h1>Every file. One <em>simple</em> place.</h1>
-          <p className="hero-lede">An easier way to work with your PDFs and documents. Convert, compress, merge, split and more — all in one place.</p>
+          <p className="hero-lede">An easier way to work with PDFs, images and Office documents. Edit, convert, compress, merge, remove backgrounds and more — all in one place.</p>
           <HeroUpload/>
         </div>
         <HeroArtwork/>
       </div>
       <div className="container trust-strip">
         <div><Zap/><span><strong>Less effort. More done.</strong><small>A clear, focused workflow</small></span></div>
-        <div><ShieldCheck/><span><strong>Private by design</strong><small>Document processing on your device</small></span></div>
+        <div><ShieldCheck/><span><strong>Private by design</strong><small>Most tools run on your device</small></span></div>
         <div><Monitor/><span><strong>One familiar workspace</strong><small>For desktop, tablet and mobile</small></span></div>
       </div>
     </section>
@@ -94,7 +94,7 @@ export default function Home(){
 
       <section id="how-it-works" className="home-section home-workflow">
         <div className="container">
-          <div className="section-heading"><h2>How FileCraft works</h2></div>
+          <div className="section-heading"><h2>How Editgoo works</h2></div>
           <ol className="home-steps">
             {steps.map(({title,description,icon:Icon},index)=><li key={title}>
               <div className="home-step-illustration" aria-hidden="true"><Icon size={29}/><span>{index+1}</span></div><h3>{title}</h3><p>{description}</p>
@@ -104,7 +104,7 @@ export default function Home(){
       </section>
 
       <section className="home-section container home-benefits">
-        <div><h2>Why choose FileCraft?</h2><Link className="inline-link" href="/features">Explore features <ArrowRight size={17}/></Link></div>
+        <div><h2>Why choose Editgoo?</h2><Link className="inline-link" href="/features">Explore features <ArrowRight size={17}/></Link></div>
         <div className="home-benefit-list">{benefits.map(({title,description,icon:Icon})=><article key={title}><span><Icon size={22}/></span><div><h3>{title}</h3><p>{description}</p></div></article>)}</div>
       </section>
 

@@ -1,12 +1,13 @@
 import type {Metadata} from 'next';
 import AllToolsDirectory from '@/components/AllToolsDirectory';
 import {directoryCategories,directoryGroups} from '@/lib/directory';
+import {pageMetadata} from '@/lib/seo';
 
-export const metadata:Metadata={
+export const metadata:Metadata=pageMetadata({
   title:'All tools for PDF, documents and images',
-  description:'Find FileCraft tools to edit PDFs, remove image backgrounds, optimize files and convert documents. Browse by category or search by task.',
-  alternates:{canonical:'/tools'}
-};
+  description:'Find Editgoo tools to edit PDFs, remove image backgrounds, optimize files and convert documents. Browse by category or search by task.',
+  path:'/tools'
+});
 
 export default async function Tools({searchParams}:{searchParams:Promise<{category?:string|string[];group?:string|string[]}>}) {
   const query=await searchParams;

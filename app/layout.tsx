@@ -12,17 +12,19 @@ import {adsEnabled, adsensePublisher, googleVerification, sitePublic, siteUrl} f
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: 'FileCraft — Free PDF, Word & Image Tools', template: '%s | FileCraft' },
-  description: 'Free tools to merge, split, compress and convert PDF, Word, Excel, presentation and image files. Check format limits and download actual processed outputs.',
+  applicationName: 'Editgoo',
+  title: { default: 'Editgoo — Free Online PDF, Image & Document Tools', template: '%s | Editgoo' },
+  description: 'Free online tools to edit, merge, split, compress and convert PDFs, images and Office documents. Most tools run in your browser, with clear limits and real downloadable results.',
   robots: sitePublic ? {index:true,follow:true} : {index:false,follow:false},
-  openGraph: {title:'FileCraft — Online Document Tools',description:'Practical file conversion and editing tools for PDF, Office and images.',url:siteUrl,type:'website',siteName:'FileCraft',locale:'en_US'},
-  twitter: {card:'summary',title:'FileCraft — Free PDF & Document Tools'},
-  icons: {icon:'/favicon.svg'},
+  openGraph: {title:'Editgoo — Online tools for PDFs, images and documents',description:'Edit, convert and compress PDFs, images and Office files. Most tools run right in your browser.',url:siteUrl,type:'website',siteName:'Editgoo',locale:'en_US',images:[{url:'/og-image.png',width:1200,height:630,alt:'Editgoo — online tools for PDFs, images and documents'}]},
+  // No twitter title/description here: they would override every page; X/Twitter falls back to each page's og: tags.
+  twitter: {card:'summary_large_image',images:['/og-image.png']},
+  icons: {icon:[{url:'/favicon-32.png',sizes:'32x32',type:'image/png'},{url:'/icon-192.png',sizes:'192x192',type:'image/png'}],apple:'/apple-touch-icon.png'},
   ...(googleVerification ? { verification: {google:googleVerification} } : {})
 };
 export default function RootLayout({children}:{children:React.ReactNode}) {
   return <html lang="en"><head>
 
-    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'WebSite',name:'FileCraft',url:siteUrl,description:'Online file conversion and document tools'}).replace(/</g,'\\u003c')}}/>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify({'@context':'https://schema.org','@type':'WebSite',name:'Editgoo',url:siteUrl,description:'Online tools for PDFs, images and documents'}).replace(/</g,'\\u003c')}}/>
   </head><body><ContentAds enabled={adsEnabled} publisher={adsensePublisher}/><Header/><a className="skip-link" href="#main-content">Skip to content</a><main id="main-content">{children}</main><Footer/><MobileToolsNav/></body></html>
 }

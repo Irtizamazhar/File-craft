@@ -1,6 +1,6 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
-import {CheckCircle2,Loader2,Plus,ShieldCheck,TriangleAlert} from 'lucide-react';
+import {CheckCircle2,Loader2,Plus,TriangleAlert} from 'lucide-react';
 import {processFile,validateInput,type ProcessedFile} from '@/lib/browser-engine';
 import {takeFiles} from '@/lib/file-handoff';
 import type {Tool} from '@/lib/tools';
@@ -123,9 +123,6 @@ export default function CatalogWorkspace({tool}:{tool:Tool}){
         :<input type={c.kind==='number'?'number':c.kind==='password'?'password':'text'} autoComplete="off" disabled={disabled} value={options[c.key]} onChange={e=>changeOption(c.key,e.target.value)}/>}
     </label>)}
     <label className={styles.field}><span>Output filename (optional)</span><input maxLength={75} disabled={disabled} placeholder="Let Editgoo name it" value={outputName} onChange={e=>{resetResults();setError('');setOutputName(e.target.value)}}/></label>
-    <p className={styles.help}>The correct output extension is added automatically. Multiple outputs keep their generated names.</p>
-    {tool.notice&&<p className={styles.note}><TriangleAlert size={15} aria-hidden="true"/>{tool.notice}</p>}
-    <p className={styles.info}><ShieldCheck size={15} aria-hidden="true"/>Files are processed in your browser and are not uploaded.</p>
   </OptionsPanel>;
 
   const action=done

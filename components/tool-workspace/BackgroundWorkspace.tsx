@@ -15,7 +15,7 @@ type Editor={originalPane:ReactNode;previewPane:ReactNode;refineTools:ReactNode;
  */
 export default function BackgroundWorkspace(p:{
   state:{segmented?:boolean}|null;busy:boolean;result:string;format:string;formatLabel:string;
-  mainInput:ReactNode;notice:ReactNode;modelSelect:ReactNode;errorBox:ReactNode;cancelButton:ReactNode;historyButtons:ReactNode;zoomControls:ReactNode;status:ReactNode;
+  mainInput:ReactNode;modelSelect:ReactNode;errorBox:ReactNode;cancelButton:ReactNode;historyButtons:ReactNode;zoomControls:ReactNode;status:ReactNode;
   editor:Editor|null|false;segment:()=>unknown;download:()=>unknown;select:(file?:File)=>unknown;browse:()=>void;
 }){
   const [hint,setHint]=useState('');
@@ -46,7 +46,7 @@ export default function BackgroundWorkspace(p:{
   </InlineDropzone>;
   const panel=<OptionsPanel title={done?'Edit your cutout':'Settings'}>
     <div className={styles.panelStatus}>{p.status}</div>
-    {!done&&<div className={'editor-properties '+styles.panelStack}>{loaded&&p.modelSelect}{p.notice}</div>}
+    {!done&&loaded&&<div className={'editor-properties '+styles.panelStack}>{p.modelSelect}</div>}
     {done&&p.editor&&<div className={'editor-properties '+styles.panelStack}>{p.editor.refineTools}{p.editor.formatControls}</div>}
   </OptionsPanel>;
   const action=<>

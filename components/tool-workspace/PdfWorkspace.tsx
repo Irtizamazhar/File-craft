@@ -14,7 +14,7 @@ import styles from './workspace.module.css';
  */
 export default function PdfWorkspace(p:{
   loaded:boolean;busy:boolean;previewBusy:boolean;error:string;result:string;exportReady:boolean;
-  mainInput:ReactNode;imagePicker:ReactNode;notice:ReactNode;toolButtons:ReactNode;status:ReactNode;pageList:ReactNode;pageTools:ReactNode;pageView:ReactNode;
+  mainInput:ReactNode;imagePicker:ReactNode;toolButtons:ReactNode;status:ReactNode;pageList:ReactNode;pageTools:ReactNode;pageView:ReactNode;
   noTextNotice:ReactNode;reviewButton:ReactNode;reviewText:ReactNode;propertyFields:ReactNode;
   upload:(file?:File)=>unknown;exportFile:()=>void;browse:()=>void;
 }){
@@ -48,7 +48,6 @@ export default function PdfWorkspace(p:{
         ?<div className={'editor-properties '+styles.panelStack}>{p.propertyFields}</div>
         :<p className={styles.help}>Open a PDF, then choose a text or image object on the page, or add a new item from the toolbar.</p>}
       {p.loaded&&<div className={styles.panelStack}>{p.reviewButton}{p.reviewText}</div>}
-      <div className={styles.panelStack}>{p.notice}</div>
     </div>
   </OptionsPanel>;
 

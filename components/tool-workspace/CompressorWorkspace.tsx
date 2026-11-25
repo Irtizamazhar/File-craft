@@ -17,7 +17,7 @@ type CompressItem={id:string;file:File;status:'ready'|'working'|'done'|'error';e
  */
 export default function CompressorWorkspace<T extends CompressItem>(p:{
   items:T[];busy:boolean;error:string;batch:string;
-  mainInput:ReactNode;notice:ReactNode;footnote:ReactNode;
+  mainInput:ReactNode;
   modeSelect:(item:T,className:string)=>ReactNode;formatSize:(n:number)=>string;
   select:(files:File[])=>void;run:()=>unknown;zip:()=>unknown;removeItem:(item:T)=>void;clearFiles:()=>void;browse:()=>void;
 }){
@@ -60,7 +60,6 @@ export default function CompressorWorkspace<T extends CompressItem>(p:{
 
   const panel=<OptionsPanel title="Options">
     {count?items.map(item=><div key={item.id}>{p.modeSelect(item,styles.field)}</div>):<p className={styles.help}>Add files to choose how each one is compressed.</p>}
-    <div className={styles.panelStack}>{p.notice}{p.footnote}</div>
   </OptionsPanel>;
 
   const action=<>

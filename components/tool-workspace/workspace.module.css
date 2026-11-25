@@ -152,6 +152,16 @@
 .panelStatus{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
 .panelStatus :global(.editor-stage){font-size:12.5px;line-height:1.5;margin:0;color:#384152}
 .panelStatus :global(.advanced-notice){font-size:12px;margin:0}
+.panelStack :global(.advanced-footnote){margin:0;line-height:1.5}
+/* File Compressor cards keep the global "compressor-item" hook (tests, downloads); its global box styling is undone here. */
+.compressCard.compressCard{padding:0;border:1px solid #ece4ea;border-radius:12px;background:#fff}
+.cardMeta b{color:#151d30}
+.cardSaving{display:flex;align-items:center;gap:5px;margin-top:4px;font-size:12px;font-weight:750;color:#166534}
+.cardStatus{display:flex;align-items:center;gap:6px;margin:5px 0 0;font-size:12px;line-height:1.35;color:#384152}
+.cardError{margin:5px 0 0;font-size:12px;line-height:1.4;color:#9f1239}
+.cardDownload{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:6px 10px;border-radius:8px;background:#15803d;color:#fff;font-size:12.5px;font-weight:750;text-decoration:none}
+.cardDownload:hover{background:#116632}
+.cardDownload:focus-visible{outline:2px solid #151d30;outline-offset:2px}
 /* Edit PDF: editing tools in the box header, page strip + editable page in the box, properties in the panel. */
 .pdfToolbar.pdfToolbar{flex:1;min-width:0;padding:0;border:0;margin:0;gap:4px;flex-wrap:wrap}
 .pdfToolbar.pdfToolbar.pdfToolbar>button{min-height:32px;min-width:32px;padding:5px 8px;font-size:12px;gap:5px}

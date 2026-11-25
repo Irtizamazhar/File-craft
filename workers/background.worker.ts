@@ -11,6 +11,11 @@ type GpuNavigator={gpu?:{requestAdapter():Promise<GpuAdapter|null>}};
 
 let session:Ort.InferenceSession|undefined,sessionKind:SegmentationKind|undefined,sessionBackend:Backend|undefined;
 let runtime:Promise<{ort:OrtModule;webgpu:boolean}>|undefined;
+// Model loading can start early (a warm-up as soon as an image is open); a request that arrives meanwhile joins it.
+let loading:Promise<void>|undefined;
+// Model-loading progress goes to whoever is waiting for it: the latest request (a warm-up uses id 0, which the page ignores).
+let listener=0;
+const progress=(stage:string,value?:number)=>self.postMessage({id:listener,stage,...(value===undefined?{}:{progress:value})});
 
 // WebGPU is much faster when the browser exposes an adapter; otherwise load the
 // smaller WASM-only runtime so devices without WebGPU do not download the larger build.
@@ -31,8 +36,9 @@ async function loadRuntime(origin:string){
     try{ort=await import('onnxruntime-web/webgpu') as unknown as OrtModule}
     catch{webgpu=false;ort=await import('onnxruntime-web/wasm')}
   }else ort=await import('onnxruntime-web/wasm');
-  // No cross-origin isolation on this site, so SharedArrayBuffer threads are unavailable.
-  ort.env.wasm.numThreads=1;
+  // SharedArrayBuffer threads need cross-origin isolation (COOP/COEP response headers). Without it, one thread as
+  // before; with it, several cores share the work (same model and result, a few times faster on most computers).
+  ort.env.wasm.numThreads=self.crossOriginIsolated?Math.max(1,Math.min(4,(navigator.hardwareConcurrency||2)-1)):1;
   // Explicit file paths instead of a '/engines/' prefix: the .mjs loader goes through a JavaScript-typed
   // Blob URL because some hosts serve .mjs as text/plain. A mislabelled .wasm still loads, since the
   // runtime falls back from streaming compilation to ArrayBuffer instantiation.
@@ -41,14 +47,14 @@ async function loadRuntime(origin:string){
   return {ort,webgpu};
 }
 
-async function modelBytes(origin:string,kind:SegmentationKind,id:number){
+async function modelBytes(origin:string,kind:SegmentationKind){
   const path=kind==='object'?OBJECT_MODEL.path:'/models/modnet-portrait.onnx';
   const url=origin+path+'?v='+(kind==='object'?OBJECT_MODEL.sha256.slice(0,12):'portrait-v1');
   let cache:Cache|undefined;
   try{
     cache=await caches.open('filecraft-segmentation-v1');
     const stored=await cache.match(url);
-    if(stored){self.postMessage({id,stage:'Loading cached model...',progress:100});return new Uint8Array(await stored.arrayBuffer())}
+    if(stored){progress('Loading cached model...',100);return new Uint8Array(await stored.arrayBuffer())}
   }catch{/* Storage disabled/quota: inference can still run. */}
   const response=await fetch(url);
   if(!response.ok)throw Error('The AI model file is unavailable (HTTP '+response.status+' for '+path+'). Run "npm run setup:object-model" on the server.');
@@ -60,8 +66,8 @@ async function modelBytes(origin:string,kind:SegmentationKind,id:number){
     const {done,value}=await reader.read();
     if(done)break;
     chunks.push(value);loaded+=value.length;
-    const progress=Math.min(99,Math.round(loaded/total*100));
-    if(progress!==lastProgress){lastProgress=progress;self.postMessage({id,stage:'Loading local model...',progress})}
+    const percent=Math.min(99,Math.round(loaded/total*100));
+    if(percent!==lastProgress){lastProgress=percent;progress('Loading local model...',percent)}
   }
   const bytes=new Uint8Array(loaded);let offset=0;
   for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length}
@@ -81,18 +87,24 @@ async function createSession(ort:OrtModule,bytes:Uint8Array,backend:Backend){
 async function releaseSession(){await session?.release().catch(()=>{});session=undefined;sessionKind=undefined;sessionBackend=undefined}
 
 async function ensureSession(origin:string,kind:SegmentationKind,id:number){
+  listener=id;
   if(session&&sessionKind===kind)return;
-  await releaseSession();
-  runtime??=loadRuntime(origin);
-  const {ort,webgpu}=await runtime;
-  const bytes=await modelBytes(origin,kind,id);
-  self.postMessage({id,stage:'Initializing on-device model...',progress:100});
-  if(webgpu){
-    try{session=await createSession(ort,bytes,'webgpu');sessionBackend='webgpu'}
-    catch{session=undefined}
-  }
-  if(!session){session=await createSession(ort,bytes,'wasm');sessionBackend='wasm'}
-  sessionKind=kind;
+  // Join a load that is already running (usually the warm-up); if it was for the other model, load this one after it.
+  if(loading){await loading.catch(()=>{});if(session&&sessionKind===kind)return}
+  loading=(async()=>{
+    await releaseSession();
+    runtime??=loadRuntime(origin);
+    const {ort,webgpu}=await runtime;
+    const bytes=await modelBytes(origin,kind);
+    progress('Initializing on-device model...',100);
+    if(webgpu){
+      try{session=await createSession(ort,bytes,'webgpu');sessionBackend='webgpu'}
+      catch{session=undefined}
+    }
+    if(!session){session=await createSession(ort,bytes,'wasm');sessionBackend='wasm'}
+    sessionKind=kind;
+  })();
+  try{await loading}finally{loading=undefined}
 }
 
 async function infer(pixels:Uint8ClampedArray,kind:SegmentationKind){
@@ -118,10 +130,13 @@ async function localMatte(pixels:Uint8ClampedArray,origin:string,kind:Segmentati
     const {ort}=await runtime!;
     await releaseSession();
     self.postMessage({id,stage:'WebGPU failed, retrying on CPU...'});
-    session=await createSession(ort,await modelBytes(origin,kind,id),'wasm');sessionBackend='wasm';sessionKind=kind;
+    listener=id;session=await createSession(ort,await modelBytes(origin,kind),'wasm');sessionBackend='wasm';sessionKind=kind;
     return infer(pixels,kind);
   }
 }
+
+/** Load the in-browser model ahead of time (sent as soon as an image is open); produces no result message. */
+export type WorkerWarmup={id:0;origin:string;kind:SegmentationKind;warm:true};
 
 export type WorkerRequest={
   id:number;origin:string;kind:SegmentationKind;width:number;height:number;
@@ -133,7 +148,12 @@ export type WorkerRequest={
   local?:{pixels:Uint8ClampedArray;box:Box};
 };
 
-self.onmessage=async(event:MessageEvent<WorkerRequest>)=>{
+self.onmessage=async(event:MessageEvent<WorkerRequest|WorkerWarmup>)=>{
+  if('warm' in event.data){
+    // Failures are not reported here: the real request retries the load and reports any error itself.
+    try{await ensureSession(event.data.origin,event.data.kind,0)}catch{await releaseSession()}
+    return;
+  }
   const {id,origin,kind,width,height,rgba,serverMatte,local}=event.data;const start=performance.now();
   try{
     let raw:Float32Array,modelSize:number,inferenceMs:number;

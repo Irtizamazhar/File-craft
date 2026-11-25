@@ -8,12 +8,22 @@ import {readEditorImage,canvasFrom,composeCutout,transformCutout,type Cutout} fr
 import {letterbox} from '@/lib/advanced/matte';
 import {EXPORT_FORMATS,exportCutout,type ExportFormat} from '@/lib/advanced/export-formats';
 import {PAD_FILL,forgetServerEngine,serverEngine,serverMatte,type ServerEngineInfo,type ServerMatte} from '@/lib/advanced/server-engine';
-import type {WorkerRequest} from '../workers/background.worker';
+import type {WorkerRequest,WorkerWarmup} from '../workers/background.worker';
 import BackgroundWorkspace from './tool-workspace/BackgroundWorkspace';
 export default function BackgroundRemover({layout='classic'}:{layout?:'classic'|'workspace'}={}){const timer=useRef<ReturnType<typeof setTimeout>|null>(null),input=useRef<HTMLInputElement>(null),backgroundInput=useRef<HTMLInputElement>(null),canvas=useRef<HTMLCanvasElement>(null),originalCanvas=useRef<HTMLCanvasElement>(null),baseline=useRef<Cutout|null>(null),lastBrush=useRef<{x:number;y:number}|null>(null),frame=useRef<HTMLDivElement>(null),worker=useRef<Worker|null>(null),current=useRef<Cutout|null>(null),undo=useRef<Cutout[]>([]),redo=useRef<Cutout[]>([]),stroke=useRef(false),pan=useRef<{x:number;y:number;left:number;top:number}|null>(null),urls=useRef<string[]>([]);const[state,setState]=useState<Cutout|null>(null),[busy,setBusy]=useState(false),[stage,setStage]=useState(''),[error,setError]=useState(''),[mode,setMode]=useState<'pan'|'erase'|'restore'|'select'>('pan'),[brush,setBrush]=useState(30),[zoom,setZoom]=useState(1),[compare,setCompare]=useState(0),[version,setVersion]=useState(0),[result,setResult]=useState(''),[crop,setCrop]=useState([0,0,1,1]),[dimensions,setDimensions]=useState([1,1]),[kind,setKind]=useState<SegmentationKind>('object'),[progress,setProgress]=useState<number|null>(null),[hardness,setHardness]=useState(100),[feather,setFeather]=useState(1),[edgeContrast,setEdgeContrast]=useState(1),[review,setReview]=useState('');
  const[format,setFormat]=useState<ExportFormat>('png');const formatInfo=EXPORT_FORMATS.find(f=>f.id===format)!;
  const running=useRef(false),active=useRef(0),abort=useRef<AbortController|null>(null);const[engineInfo,setEngineInfo]=useState<ServerEngineInfo|null>(null);
  useEffect(()=>{void serverEngine().then(setEngineInfo)},[]);
+ // Warm-up: as soon as an image is open, the worker starts loading the on-device model, so "Remove background" only
+ // has to run it. Same model and same result; skipped when the server engine does the work.
+ const imageOpen=!!state&&!state.segmented;
+ useEffect(()=>{
+  if(!imageOpen||!engineInfo||engineInfo.available)return;
+  try{
+   if(!worker.current){worker.current=new Worker(new URL('../workers/background.worker.ts',import.meta.url),{type:'module'});worker.current.onerror=()=>{worker.current?.terminate();worker.current=null}}
+   const warmup:WorkerWarmup={id:0,origin:location.origin,kind,warm:true};worker.current.postMessage(warmup);
+  }catch{/* the normal path creates the worker and reports problems */}
+ },[imageOpen,kind,engineInfo]);
  // Ctrl+V / ⌘V anywhere on the page: use an image copied from a browser, screenshot tool or file manager.
  // Only clipboard images are taken over; pasting text into the form fields keeps working normally.
  const selectRef=useRef<(file?:File)=>Promise<void>>(async()=>{});useEffect(()=>{selectRef.current=select});

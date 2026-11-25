@@ -152,6 +152,19 @@
 .panelStatus{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
 .panelStatus :global(.editor-stage){font-size:12.5px;line-height:1.5;margin:0;color:#384152}
 .panelStatus :global(.advanced-notice){font-size:12px;margin:0}
+/* Edit PDF: editing tools in the box header, page strip + editable page in the box, properties in the panel. */
+.pdfToolbar.pdfToolbar{flex:1;min-width:0;padding:0;border:0;margin:0;gap:4px;flex-wrap:wrap}
+.pdfToolbar.pdfToolbar.pdfToolbar>button{min-height:32px;min-width:32px;padding:5px 8px;font-size:12px;gap:5px}
+.pdfToolbar.pdfToolbar>button svg{width:16px;height:16px}
+.pdfPanes{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px;height:100%;min-height:0}
+.pdfPanes :global(.pdf-pages){max-height:none;height:100%;min-height:0;align-content:start}
+.pdfView{display:flex;flex-direction:column;min-height:0;min-width:0}
+.pdfView :global(.page-management){padding:0 0 8px}
+.pdfView :global(.pdf-scroll-area){flex:1;min-height:0;max-height:none;padding:10px}
+.pdfPanel{display:flex;flex-direction:column;gap:14px}
+.pdfPanel :global(.pdf-text-review){margin:0;max-height:220px;overflow:auto;font-size:12.5px}
+/* A secondary link that sits in the box header on phones and under the main button on larger screens. */
+.onlyPhone.onlyPhone.onlyPhone{display:none}
 
 /* ---------- content below the workspace ---------- */
 .why{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px}
@@ -191,6 +204,16 @@
   .bgPanes.bgDone{grid-template-columns:minmax(0,1fr);height:auto}
   .bgPanes.bgDone>div:first-child{display:none}
   .bgPanes :global(.image-canvas-frame){min-height:240px}
+  .onlyPhone.onlyPhone.onlyPhone{display:flex}
+  .notPhone.notPhone{display:none}
+  /* Phones: the editing tools become one swipeable row, the page comes first (it scrolls inside its own frame) and
+     the page strip follows it. */
+  .pdfToolbar.pdfToolbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .pdfToolbar.pdfToolbar>*{flex-shrink:0}
+  .pdfPanes{grid-template-columns:minmax(0,1fr);height:auto}
+  .pdfPanes :global(.pdf-pages){order:2;display:flex;overflow-x:auto;height:auto}
+  .pdfView :global(.page-management strong){flex-basis:auto;margin-bottom:0}
+  .pdfView :global(.pdf-scroll-area){max-height:70vh}
   .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
   .why{grid-template-columns:1fr}
 }

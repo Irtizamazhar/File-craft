@@ -61,7 +61,7 @@ export default function CatalogWorkspace({tool}:{tool:Tool}){
     }catch(e){if(id===selection.current)setError((e as Error).message)}finally{if(id===selection.current)setChecking(false)}
   }
   function browse(slot:number|null=null){if(busy||checking)return;slotTarget.current=slot;input.current?.click()}
-  function move(from:number,to:number){if(to<0||to>=list.length||from===to)return;resetResults();setList(prev=>{const next=[...prev];const [item]=next.splice(from,1);next.splice(to,0,item);return next})}
+  function move(from:number,to:number){if(to<0||to>=list.length||from===to)return;resetResults();setError('');setList(prev=>{const next=[...prev];const [item]=next.splice(from,1);next.splice(to,0,item);return next})}
   function remove(index:number){resetResults();setError('');if(compare)setSlots(prev=>prev.map((f,n)=>n===index?null:f));else setList(prev=>prev.filter((_,n)=>n!==index))}
   function reset(){selection.current++;setChecking(false);setList([]);setSlots([null,null]);setError('');setHint('');setOutputName('');resetResults();focusChoose.current=true}
   function again(){resetResults();setError('')}
@@ -79,7 +79,8 @@ export default function CatalogWorkspace({tool}:{tool:Tool}){
       void fetch('/api/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:tool.slug,status:'completed'})}).catch(()=>{});
     }catch(e){setError(e instanceof Error?e.message:'This file could not be processed.')}finally{running.current=false;setBusy(false)}
   }
-  const changeOption=(key:string,value:string)=>{resetResults();setOptions(prev=>({...prev,[key]:value}))};
+  // Adjusting the options (or the files) answers an error, so the button goes back to "Process N files".
+  const changeOption=(key:string,value:string)=>{resetResults();setError('');setOptions(prev=>({...prev,[key]:value}))};
 
   const disabled=busy||checking,done=results.length>0,count=files.length,noun=tool.multi?'files':'file';
   const mode:ActionMode=busy?{kind:'busy',label:'Processing…'}
@@ -121,7 +122,7 @@ export default function CatalogWorkspace({tool}:{tool:Tool}){
         ?<select disabled={disabled} value={options[c.key]} onChange={e=>changeOption(c.key,e.target.value)}>{c.values?.map(v=><option key={v}>{v}</option>)}</select>
         :<input type={c.kind==='number'?'number':c.kind==='password'?'password':'text'} autoComplete="off" disabled={disabled} value={options[c.key]} onChange={e=>changeOption(c.key,e.target.value)}/>}
     </label>)}
-    <label className={styles.field}><span>Output filename (optional)</span><input maxLength={75} disabled={disabled} placeholder="Let Editgoo name it" value={outputName} onChange={e=>{resetResults();setOutputName(e.target.value)}}/></label>
+    <label className={styles.field}><span>Output filename (optional)</span><input maxLength={75} disabled={disabled} placeholder="Let Editgoo name it" value={outputName} onChange={e=>{resetResults();setError('');setOutputName(e.target.value)}}/></label>
     <p className={styles.help}>The correct output extension is added automatically. Multiple outputs keep their generated names.</p>
     {tool.notice&&<p className={styles.note}><TriangleAlert size={15} aria-hidden="true"/>{tool.notice}</p>}
     <p className={styles.info}><ShieldCheck size={15} aria-hidden="true"/>Files are processed in your browser and are not uploaded.</p>

@@ -25,6 +25,7 @@ export default function BackgroundWorkspace(p:{
   useEffect(()=>{setExported(p.result?{url:p.result,state:p.state}:null)},[p.result]);// eslint-disable-line react-hooks/exhaustive-deps
   const fresh=!!p.result&&exported?.url===p.result&&exported.state===p.state;
   const loaded=!!p.state,done=!!p.state?.segmented;
+  useEffect(()=>{if(loaded)setHint('')},[loaded]);
   const mode:ActionMode=p.busy?{kind:'busy',label:'Working...'}
     :!loaded?{kind:'idle',label:'Remove background',unavailable:true}
     :!done?{kind:'idle',label:'Remove background'}

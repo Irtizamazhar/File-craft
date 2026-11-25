@@ -29,7 +29,7 @@ async function run(){
       // Older builds need a click; newer ones start automatically after upload.
       await page.waitForTimeout(1500);
       const status=await page.locator('[role=status]').textContent().catch(()=>'');
-      if(/Image loaded/.test(status||''))await page.getByRole('button',{name:'Remove background with AI'}).click();
+      if(/Image loaded/.test(status||''))await page.getByRole('button',{name:'Remove background',exact:true}).click();
       const done=await page.waitForFunction(()=>{const s=document.querySelector('[role=status]')?.textContent||'';const alert=document.querySelector('main [role=alert]')?.textContent||'';return s.includes('Foreground estimated.')||s.includes('background removed')?{s}:alert?{alert}:false},{},{timeout:600000,polling:500}).then(h=>h.jsonValue());
       const seconds=+((Date.now()-started)/1000).toFixed(1);
       if(done.alert){results.push({name:c.name,error:done.alert,seconds});console.log(c.name,'ERROR',done.alert);continue}

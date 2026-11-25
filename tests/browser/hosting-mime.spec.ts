@@ -52,7 +52,7 @@ test('background removal works when ONNX Runtime files are served as text/plain'
   await page.goto('/remove-background');
   await page.locator('input[type=file]').first().setInputFiles('tests/fixtures/objects/watch.jpg');
   await expect(page.getByRole('status')).toContainText('Image loaded');
-  await page.getByRole('button',{name:'Remove background with AI'}).click();
+  await page.getByRole('button',{name:'Remove background',exact:true}).click();
   await expect(page.getByRole('status')).toContainText('Foreground estimated.',{timeout:240000});
   await expect(page.locator('main [role=alert]')).toHaveCount(0);
 });

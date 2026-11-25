@@ -2,6 +2,7 @@
 import type * as Ort from 'onnxruntime-web/wasm';
 import {OBJECT_MODEL,normalizedPixels,probabilities,type SegmentationKind} from '../lib/advanced/segmentation';
 import {finishMatte,resizeMatte,type Box} from '../lib/advanced/matte';
+import {moduleUrl} from '../lib/module-url';
 
 type OrtModule=typeof Ort;
 type Backend='webgpu'|'wasm';
@@ -32,7 +33,11 @@ async function loadRuntime(origin:string){
   }else ort=await import('onnxruntime-web/wasm');
   // No cross-origin isolation on this site, so SharedArrayBuffer threads are unavailable.
   ort.env.wasm.numThreads=1;
-  ort.env.wasm.wasmPaths=origin+'/engines/';
+  // Explicit file paths instead of a '/engines/' prefix: the .mjs loader goes through a JavaScript-typed
+  // Blob URL because some hosts serve .mjs as text/plain. A mislabelled .wasm still loads, since the
+  // runtime falls back from streaming compilation to ArrayBuffer instantiation.
+  const build=webgpu?'ort-wasm-simd-threaded.asyncify':'ort-wasm-simd-threaded';
+  ort.env.wasm.wasmPaths={mjs:await moduleUrl(`${origin}/engines/${build}.mjs`),wasm:`${origin}/engines/${build}.wasm`};
   return {ort,webgpu};
 }
 

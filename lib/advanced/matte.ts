@@ -203,10 +203,31 @@ export function estimateForeground(rgba:Uint8ClampedArray,alpha:Float32Array,w:n
   return out;
 }
 
-/** Full pipeline after the model: edge-aware upscale refinement, stray-blob cleanup, colour decontamination. */
+/**
+ * Final matte clean-up against the faint light haze ("white shade") around cut-out subjects.
+ * 1. The guided filter can follow background texture (clouds, gradients) and add faint alpha where the model was
+ *    confident it saw background. Refinement may still sharpen real edges, but it may not raise alpha where the
+ *    model's value is below `backgroundMax`.
+ * 2. Levels: alpha at or below `low` becomes fully transparent and at or above `high` fully opaque; values in
+ *    between are stretched linearly around 0.5, so hair and soft edges keep their gradient.
+ * Works in place on the refined matte; `model` is the model's matte at the same resolution.
+ */
+export function cleanMatte(alpha:Float32Array,model:Float32Array,options:{backgroundMax?:number;low?:number;high?:number}={}){
+  if(alpha.length!==model.length)throw Error('Matte dimensions do not match.');
+  const backgroundMax=options.backgroundMax??.05,low=options.low??.04,high=options.high??.96,span=high-low;
+  for(let i=0;i<alpha.length;i++){
+    let a=alpha[i];
+    if(model[i]<backgroundMax&&a>model[i])a=model[i];
+    alpha[i]=Math.min(1,Math.max(0,(a-low)/span));
+  }
+  return alpha;
+}
+
+/** Full pipeline after the model: edge-aware refinement, haze clean-up, stray-blob cleanup, colour decontamination. */
 export function finishMatte(rgba:Uint8ClampedArray,raw:Float32Array,w:number,h:number,modelSize:number){
   const scale=Math.max(1,Math.round(Math.max(w,h)/modelSize));
   const refined=guidedRefine(raw,rgba,w,h,{scale,radius:2,eps:1e-3});
+  cleanMatte(refined,raw);
   const removed=removeStrayRegions(refined,w,h);
   const foreground=estimateForeground(rgba,refined,w,h);
   const alpha=new Uint8ClampedArray(w*h);for(let i=0;i<alpha.length;i++)alpha[i]=Math.round(refined[i]*255);

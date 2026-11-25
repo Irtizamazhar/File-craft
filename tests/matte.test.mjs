@@ -76,6 +76,19 @@ test('estimateForeground removes background colour from semi-transparent edge pi
   assert.deepEqual([...fg.slice((10*w+350)*4,(10*w+350)*4+4)],[...rgba.slice((10*w+350)*4,(10*w+350)*4+4)],'transparent pixels unchanged');
 });
 
+test('cleanMatte removes faint haze where the model saw background and keeps soft edges',()=>{
+  // [refined, model] pairs: haze the refinement added over confident background, faint values, a soft edge, near-solid.
+  const refined=Float32Array.from([.20,.03,.50,.27,.97,.30]),model=Float32Array.from([.01,.03,.50,.30,.99,.04]);
+  const out=matte.cleanMatte(refined,model);
+  assert.equal(out[0],0,'refinement cannot add alpha where the model was confident it saw background');
+  assert.equal(out[1],0,'alpha at or below 4% becomes fully transparent');
+  assert.ok(Math.abs(out[2]-.5)<1e-6,'a 50% soft edge keeps its value');
+  assert.ok(out[3]>.2&&out[3]<.27,'soft hair/edge values keep a gradient (slightly stretched)');
+  assert.equal(out[4],1,'near-solid foreground becomes fully opaque');
+  assert.equal(out[5],0,'faint alpha over a model background value is capped to the model and cleared');
+  assert.throws(()=>matte.cleanMatte(new Float32Array(2),new Float32Array(3)),/dimensions/);
+});
+
 test('finishMatte returns full-size 8-bit alpha and foreground',()=>{
   const w=40,h=30,rgba=new Uint8ClampedArray(w*h*4).fill(128),raw=new Float32Array(w*h);
   for(let y=5;y<25;y++)for(let x=5;x<35;x++)raw[y*w+x]=1;

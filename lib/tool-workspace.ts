@@ -5,7 +5,7 @@
  * The previous layouts (components/ToolProcessor.tsx and the classic advanced tool layouts) stay in the code base
  * as the fallback, so switching back needs no other change.
  */
-export const WORKSPACE_TOOLS:readonly string[]=['merge-pdf','remove-background','split-pdf'];
+export const WORKSPACE_TOOLS:readonly string[]=['merge-pdf','remove-background','split-pdf','compress-pdf'];
 
 export function usesWorkspace(slug:string){
   return process.env.NEXT_PUBLIC_ONE_STEP_WORKSPACE!=='off'&&WORKSPACE_TOOLS.includes(slug);

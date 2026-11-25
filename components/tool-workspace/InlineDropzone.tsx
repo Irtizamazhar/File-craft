@@ -8,9 +8,9 @@ import styles from './workspace.module.css';
  * (file cards, an editor canvas or the result) inside the same box. Drag-and-drop works on the whole box in every
  * state, and Ctrl+V pastes files while the workspace is on screen. The tool owns the single hidden file input.
  */
-export default function InlineDropzone({label,loaded,disabled,onFiles,onBrowse,header,children,message,overlay,empty,acceptPaste=true}:{
+export default function InlineDropzone({label,loaded,disabled,onFiles,onBrowse,header,children,message,overlay,empty,acceptPaste=true,className=''}:{
   label:string;loaded:boolean;disabled:boolean;onFiles:(files:File[])=>void;onBrowse:()=>void;
-  header?:ReactNode;children?:ReactNode;message?:ReactNode;overlay?:ReactNode;acceptPaste?:boolean;
+  header?:ReactNode;children?:ReactNode;message?:ReactNode;overlay?:ReactNode;acceptPaste?:boolean;className?:string;
   empty:{title:string;types:string;limits?:string;button:string;buttonRef?:Ref<HTMLButtonElement>;extra?:ReactNode};
 }){
   const [dragging,setDragging]=useState(false);
@@ -31,7 +31,7 @@ export default function InlineDropzone({label,loaded,disabled,onFiles,onBrowse,h
   },[acceptPaste]);
 
   const hasFiles=(types:readonly string[])=>types.includes('Files');
-  return <section ref={box} aria-label={label} className={styles.box+(loaded?' '+styles.loaded:'')+(dragging?' '+styles.dragging:'')}
+  return <section ref={box} aria-label={label} className={styles.box+(loaded?' '+styles.loaded:'')+(dragging?' '+styles.dragging:'')+(className?' '+className:'')}
     onDragEnter={e=>{if(hasFiles(e.dataTransfer.types)&&!disabled){e.preventDefault();setDragging(true)}}}
     onDragOver={e=>{if(hasFiles(e.dataTransfer.types)&&!disabled){e.preventDefault();e.dataTransfer.dropEffect='copy'}}}
     onDragLeave={e=>{if(!box.current?.contains(e.relatedTarget as Node|null))setDragging(false)}}

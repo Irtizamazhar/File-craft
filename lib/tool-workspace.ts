@@ -5,7 +5,7 @@
  * The previous layouts (components/ToolProcessor.tsx and the classic advanced tool layouts) stay in the code base
  * as the fallback, so switching back needs no other change.
  */
-export const WORKSPACE_TOOLS:readonly string[]=['merge-pdf','remove-background','split-pdf','compress-pdf','rotate-pdf','extract-pdf-pages','delete-pdf-pages','add-page-numbers','watermark-pdf','crop-pdf','grayscale-pdf','pdf-to-text','text-to-pdf','pdf-to-jpg','pdf-to-png','jpg-to-pdf','png-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','repair-pdf','flatten-pdf','pdf-metadata','remove-blank-pages','add-blank-pages','compare-pdf','fill-pdf-form','docx-to-pdf','docx-to-txt','txt-to-docx','docx-to-html','html-to-docx','merge-docx','xlsx-to-pdf','csv-to-xlsx','xlsx-to-csv','xlsx-to-html','pptx-to-txt','images-to-pptx','jpg-to-png','png-to-jpg','webp-to-jpg','jpg-to-webp','png-to-webp','resize-image'];
+export const WORKSPACE_TOOLS:readonly string[]=['merge-pdf','remove-background','split-pdf','compress-pdf','rotate-pdf','extract-pdf-pages','delete-pdf-pages','add-page-numbers','watermark-pdf','crop-pdf','grayscale-pdf','pdf-to-text','text-to-pdf','pdf-to-jpg','pdf-to-png','jpg-to-pdf','png-to-pdf','pdf-to-word','pdf-to-excel','pdf-to-powerpoint','repair-pdf','flatten-pdf','pdf-metadata','remove-blank-pages','add-blank-pages','compare-pdf','fill-pdf-form','docx-to-pdf','docx-to-txt','txt-to-docx','docx-to-html','html-to-docx','merge-docx','xlsx-to-pdf','csv-to-xlsx','xlsx-to-csv','xlsx-to-html','pptx-to-txt','images-to-pptx','jpg-to-png','png-to-jpg','webp-to-jpg','jpg-to-webp','png-to-webp','resize-image','rotate-image'];
 
 export function usesWorkspace(slug:string){
   return process.env.NEXT_PUBLIC_ONE_STEP_WORKSPACE!=='off'&&WORKSPACE_TOOLS.includes(slug);

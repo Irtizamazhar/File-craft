@@ -35,7 +35,6 @@ test('PDF to JPG renders pages when the worker is served as text/plain',async({p
 test('PDF first-page preview works when the worker is served as text/plain',async({page})=>{
   await page.goto('/tools/merge-pdf');
   await page.locator('input[type=file]').setInputFiles({name:'preview.pdf',mimeType:'application/pdf',buffer:await textPdf('Preview')});
-  await page.getByText('Preview first page of preview.pdf',{exact:true}).click();
   await expect(page.getByRole('img',{name:'First page of preview.pdf'})).toBeVisible();
 });
 

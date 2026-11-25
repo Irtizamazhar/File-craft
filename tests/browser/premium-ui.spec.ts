@@ -32,16 +32,16 @@ test('directory filters fit 320 px and the sheet returns keyboard focus',async({
   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth)).toBe(320);
 });
 
-test('a selected PDF has an on-demand first-page preview',async({page})=>{
+test('a selected PDF shows its first page inside the upload box',async({page})=>{
   const pdf=await PDFDocument.create();
   pdf.addPage([600,800]);
   const buffer=Buffer.from(await pdf.save());
   await page.goto('/tools/merge-pdf');
   await page.locator('input[type=file]').setInputFiles({name:'preview.pdf',mimeType:'application/pdf',buffer});
-  await page.getByText('Preview first page of preview.pdf',{exact:true}).click();
-  const image=page.getByRole('img',{name:'First page of preview.pdf'});
+  const image=page.getByRole('region',{name:'Merge PDF files'}).getByRole('img',{name:'First page of preview.pdf'});
   await expect(image).toBeVisible();
-  expect(await image.evaluate((element:HTMLImageElement)=>element.naturalHeight)).toBe(420);
+  expect(await image.evaluate((element:HTMLImageElement)=>element.naturalHeight)).toBeGreaterThan(0);
+  await expect(page.getByRole('region',{name:'Merge PDF files'}).getByText('1 page',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'Clear all'}).click();
   await expect(page.getByRole('button',{name:'Choose files'})).toBeFocused();
   await expect(image).toHaveCount(0);

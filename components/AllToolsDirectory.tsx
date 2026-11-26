@@ -3,7 +3,7 @@ import {useEffect,useMemo,useRef,useState} from 'react';
 import Link from 'next/link';
 import {
   Search, ArrowRight, ChevronRight, SlidersHorizontal, X, LayoutGrid, FileText,
-  ArrowLeftRight, Image, Layers, Shield, Flame, Scissors, Gauge, FilePen, FileArchive
+  ArrowLeftRight, Image, Layers, Shield, Flame, Scissors, Gauge, FilePen, FileArchive, Keyboard, Wrench
 } from 'lucide-react';
 import {
   directoryTools,directoryCategories,directoryGroups,inDirectoryCategory,popularSlugs,
@@ -12,9 +12,9 @@ import {
 import HeroArtwork from './HeroArtwork';
 import FeaturedToolCard from './FeaturedToolCard';
 
-const categoryIcons=[LayoutGrid,FileText,ArrowLeftRight,Image,Layers,Shield];
+const categoryIcons=[LayoutGrid,FileText,ArrowLeftRight,Image,Layers,Shield,Wrench];
 const categoryTitles:Record<DirectoryCategory,string>={
-  'All Tools':'Browse all tools',PDF:'PDF tools',Convert:'File conversion',Images:'Image tools',Office:'Office tools',Security:'Security tools'
+  'All Tools':'Browse all tools',PDF:'PDF tools',Convert:'File conversion',Images:'Image tools',Office:'Office tools',Security:'Security tools',Utilities:'Browser utilities'
 };
 const groupIcons=[LayoutGrid,Flame,Layers,Gauge,ArrowLeftRight,ArrowLeftRight,Image,FileText,Shield];
 const sheetGroups=directoryGroups.slice(1,6);
@@ -25,7 +25,7 @@ const popularOrder=new Map(popularSlugs.map((slug,index)=>[slug,index]));
 const orderedTools=[...directoryTools].sort((a,b)=>(popularOrder.get(a.slug)??Infinity)-(popularOrder.get(b.slug)??Infinity));
 
 function ToolIcon({tool}:{tool:DirectoryTool}){
-  const Icon=tool.slug==='edit-pdf'?FilePen:tool.slug.includes('compress')?FileArchive:
+  const Icon=tool.slug==='typing-test'?Keyboard:tool.slug==='edit-pdf'?FilePen:tool.slug.includes('compress')?FileArchive:
     tool.slug==='split-pdf'?Scissors:tool.slug.includes('merge')?Layers:tool.category==='Image'?Image:
     tool.category==='Convert'?ArrowLeftRight:FileText;
   return <span className={'directory-icon icon-'+tool.category.toLowerCase()} aria-hidden="true"><Icon size={25}/></span>;

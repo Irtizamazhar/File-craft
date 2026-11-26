@@ -19,3 +19,4 @@
 .segmentation-model{max-width:420px;margin:18px 0}.object-image-grid{grid-template-columns:minmax(0,.8fr) minmax(0,1fr) 270px}.object-image-grid>div>h3{font-size:18px;margin:0 0 14px}.original-image-frame{max-height:600px;overflow:auto;border:1px solid #e0d7e5;border-radius:14px}.original-image-frame canvas{display:block;width:100%;height:auto}.model-progress{display:grid;gap:8px;font-size:13px;margin:15px 0}.model-progress progress{width:100%;accent-color:#f04457}.mask-review{border-left:3px solid #f04457}
 @media(max-width:1200px){.object-image-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.object-image-grid>.editor-properties{grid-column:1/-1;display:flex}}
 @media(max-width:700px){.object-image-grid{grid-template-columns:minmax(0,1fr)}.original-image-frame{max-height:220px}.original-image-frame canvas{width:100%}.object-image-grid .image-canvas-frame{height:370px}}
+.icon-utilities{background:#e6ecf8;color:#22345e}

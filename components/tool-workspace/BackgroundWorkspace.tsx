@@ -36,7 +36,7 @@ export default function BackgroundWorkspace(p:{
     setHint('');
     if(!done)void p.segment();else void p.download();
   }
-  const box=<InlineDropzone label="Remove Background image" loaded={loaded} disabled={p.busy} acceptPaste={false} className={styles.editorBox}
+  const box=<InlineDropzone label="Remove Background image" loaded={loaded} disabled={p.busy} acceptPaste={false} className={styles.editorBox+' '+styles.bgBox}
     onFiles={files=>void p.select(files[0])} onBrowse={p.browse}
     header={<><strong>{done?'Cutout':'Your image'}</strong><span className={styles.links}><span className={'editor-toolbar '+styles.bgToolbar}>{p.historyButtons}{p.zoomControls}</span><button type="button" className={styles.linkButton} disabled={p.busy} onClick={p.browse}>Choose another image</button></span></>}
     message={p.errorBox}

@@ -150,6 +150,14 @@
 /* The status line shows only while processing; otherwise (image loaded, done) it stays for screen readers only, and the review box is not shown. */
 .statusQuiet :global(.editor-stage){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
 .statusQuiet :global(.mask-review){display:none}
+/* Remove Background (computers): the panel shows all its tools without an inner scroll bar; the image box keeps its
+   height and stays in view while the page scrolls. Phones keep the stacked layout. */
+@media (min-width:768px){
+  .workspace:has(.bgBox){height:auto;grid-template-rows:auto auto;align-items:start}
+  .workspace:has(.bgBox) .box{height:clamp(420px,calc(100dvh - 222px),640px);position:sticky;top:96px}
+  .workspace:has(.bgBox) .panelBody{overflow:visible;flex:none}
+  .workspace:has(.bgBox) .actionBar{min-height:0}
+}
 /* File Compressor cards keep the global "compressor-item" hook (tests, downloads); its global box styling is undone here. */
 .compressCard.compressCard{padding:0;border:1px solid #ece4ea;border-radius:12px;background:#fff}
 .cardMeta b{color:#151d30}

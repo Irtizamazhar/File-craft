@@ -45,7 +45,7 @@ export default function BackgroundWorkspace(p:{
     {p.editor&&<div className={styles.bgPanes+(done?' '+styles.bgDone:'')}>{p.editor.originalPane}{p.editor.previewPane}</div>}
   </InlineDropzone>;
   const panel=<OptionsPanel title={done?'Edit your cutout':'Settings'}>
-    <div className={styles.panelStatus}>{p.status}</div>
+    <div className={styles.panelStatus+(done&&!p.busy?' '+styles.statusQuiet:'')}>{p.status}</div>
     {!done&&loaded&&<div className={'editor-properties '+styles.panelStack}>{p.modelSelect}</div>}
     {done&&p.editor&&<div className={'editor-properties '+styles.panelStack}>{p.editor.refineTools}{p.editor.formatControls}</div>}
   </OptionsPanel>;

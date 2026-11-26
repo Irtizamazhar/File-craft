@@ -147,6 +147,9 @@
 .panelStatus{display:flex;flex-direction:column;gap:8px;margin:0 0 12px}
 .panelStatus :global(.editor-stage){font-size:12.5px;line-height:1.5;margin:0;color:#384152}
 .panelStatus :global(.advanced-notice){font-size:12px;margin:0}
+/* After the background is removed: no engine/timing line or review box on screen (the status stays for screen readers). */
+.statusQuiet :global(.editor-stage){position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.statusQuiet :global(.mask-review){display:none}
 /* File Compressor cards keep the global "compressor-item" hook (tests, downloads); its global box styling is undone here. */
 .compressCard.compressCard{padding:0;border:1px solid #ece4ea;border-radius:12px;background:#fff}
 .cardMeta b{color:#151d30}

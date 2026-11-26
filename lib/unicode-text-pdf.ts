@@ -50,6 +50,14 @@ export async function unicodeTextPdf(text:string):Promise<PdfDocument>{
   const clean=text
     .replace(/[‎‏‪-‮⁦-⁩﻿]/g,'')// direction marks and BOM: the layout below decides direction
     .replace(/\t/g,'    ')
+    // Word writes bullets from symbol fonts as private-use characters (e.g. U+F0B7) that have no glyph anywhere:
+    // show them as a normal bullet; other private-use characters are dropped.
+    .replace(/[-]/g,'•')
+    .replace(/[--]/g,'')
+    // Common list markers, dashes and arrows that the PDF fonts lack, written with their plain equivalents.
+    .replace(/[●▪■◦‣⁃∙◆◇❖]/g,'•')
+    .replace(/[‐‑‒−]/g,'-')
+    .replace(/[→⇒➝➤➔]/g,'->')
     .replace(/[\x00-\x08\x0b-\x1f\x7f]/g,' ');
   const doc=await PDFDocument.create();
   const latin=await doc.embedFont(StandardFonts.Helvetica);

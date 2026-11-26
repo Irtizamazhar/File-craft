@@ -115,7 +115,8 @@
 .directory-search { min-width: 0; }
 .directory-search input:placeholder-shown { text-overflow: ellipsis; }
 .directory-search input::placeholder { color: #65647a; }
-.directory-search:focus-within { outline: 3px solid #7346ad; outline-offset: 3px; }
+.directory-search { transition: border-color .15s, box-shadow .15s; }
+.directory-search:focus-within { outline: none; border-color: #7346ad; box-shadow: 0 0 0 4px rgba(115, 70, 173, .14), 0 7px 14px #754c9b15; }
 .directory-search button, .sheet-title button { min-width: 44px; min-height: 44px; }
 .directory-chips { padding: 5px; margin: -5px; }
 .directory-chips button { min-height: 44px; }
@@ -148,7 +149,8 @@
 .processor-card, .advanced-panel { border-color: var(--premium-line); box-shadow: 0 12px 30px #34283d0d; }
 .tool-drop, .advanced-drop { background: #fff8fa; }
 .premium-home :focus-visible, .tools-directory :focus-visible, .footer :focus-visible { outline: 3px solid #7346ad; outline-offset: 3px; }
-.directory-search input:focus-visible { outline: none; }
+/* One focus ring for the whole search box, not a second box around the text field. */
+.directory-search input:focus-visible { outline: none !important; }
 .footer-grid { grid-template-columns: 1.35fr repeat(5,minmax(0,1fr)); gap: 22px; }
 .footer-grid h2 { font-size: .92rem; margin: 0 0 10px; }
 .footer-grid > div:not(:first-child) a { display: flex; align-items: center; width: fit-content; min-height: 44px; }

@@ -12,9 +12,9 @@
 @keyframes acct-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 
 /* ---------- header: signed-in layout ---------- */
-.site-header.is-signed-in .site-nav{gap:26px}
 .site-header.is-signed-in .nav-dropdown>button{white-space:nowrap}
-.acct-actions{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0}
+/* No auto margin on computers: like the signed-out header, the nav sits centred between the logo and the buttons. */
+.acct-actions{display:flex;align-items:center;gap:10px;flex-shrink:0}
 
 .acct-upgrade{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 16px;border-radius:11px;background:linear-gradient(120deg,#ef4459,#c0233a);color:#fff!important;font-size:14px;font-weight:750;white-space:nowrap;box-shadow:0 8px 18px rgba(220,47,69,.24)}
 .acct-upgrade:hover{filter:brightness(1.06)}
@@ -72,6 +72,7 @@
 }
 /* Up to 900px the nav folds into the menu panel (site-wide rule): bell, menu button and avatar remain. */
 @media (max-width:900px){
+  .acct-actions{margin-left:auto}
   .acct-upgrade{display:none}
   .acct-trigger{padding-right:8px;gap:6px}
   .acct-trigger-text{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}

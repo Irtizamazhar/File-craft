@@ -15,5 +15,6 @@ export const utilityTools:readonly UtilityTool[]=[
     description:'Check your typing speed in WPM and your accuracy with timed, word, quote and practice tests.',
     path:'/typing-test',
     keywords:'typing test speed wpm words per minute accuracy keyboard practice 1 minute 60 second online free'
-  }
+  },
+  {slug:'internet-speed-test',name:'Internet Speed Test',description:'Measure your download and upload speeds and available latency with Measurement Lab.',path:'/internet-speed-test',keywords:'network connection bandwidth broadband wifi Mbps latency ping jitter M-Lab'}
 ];

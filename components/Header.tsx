@@ -10,7 +10,7 @@ import NotificationBell from './header/NotificationBell';
 import {isPaid,useSession} from '@/lib/session-client';
 
 const menus=[
-  {label:'All tools',links:[['All tools','/tools'],['Remove Background','/remove-background'],['File Compressor','/file-compressor'],['Word & documents','/document-tools'],['Images','/image-tools'],['Typing Speed Test','/typing-test']]},
+  {label:'All tools',links:[['All tools','/tools'],['Remove Background','/remove-background'],['File Compressor','/file-compressor'],['Word & documents','/document-tools'],['Images','/image-tools'],['Typing Speed Test','/typing-test'],['Internet Speed Test','/internet-speed-test']]},
   {label:'PDF tools',links:[['Merge PDF','/tools/merge-pdf'],['Compress PDF','/tools/compress-pdf'],['Split PDF','/tools/split-pdf'],['Edit PDF','/edit-pdf'],['File Compressor','/file-compressor'],['All PDF tools','/pdf-tools']]},
   {label:'Convert',links:[['PDF to Word','/tools/pdf-to-word'],['Images to PDF','/tools/image-to-pdf'],['Word to PDF','/tools/docx-to-pdf'],['All conversions','/convert-tools']]}
 ];

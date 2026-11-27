@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@embedpdf/pdfium": "^2.15.1",
+    "@m-lab/ndt7": "0.1.5",
     "@pdf-lib/fontkit": "1.1.1",
     "docx": "9.5.1",
     "exceljs": "4.4.0",

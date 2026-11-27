@@ -25,7 +25,7 @@ const popularOrder=new Map(popularSlugs.map((slug,index)=>[slug,index]));
 const orderedTools=[...directoryTools].sort((a,b)=>(popularOrder.get(a.slug)??Infinity)-(popularOrder.get(b.slug)??Infinity));
 
 function ToolIcon({tool}:{tool:DirectoryTool}){
-  const Icon=tool.slug==='typing-test'?Keyboard:tool.slug==='edit-pdf'?FilePen:tool.slug.includes('compress')?FileArchive:
+  const Icon=tool.slug==='typing-test'?Keyboard:tool.slug==='internet-speed-test'?Gauge:tool.slug==='edit-pdf'?FilePen:tool.slug.includes('compress')?FileArchive:
     tool.slug==='split-pdf'?Scissors:tool.slug.includes('merge')?Layers:tool.category==='Image'?Image:
     tool.category==='Convert'?ArrowLeftRight:FileText;
   return <span className={'directory-icon icon-'+tool.category.toLowerCase()} aria-hidden="true"><Icon size={25}/></span>;

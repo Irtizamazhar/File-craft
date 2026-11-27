@@ -393,7 +393,7 @@ test.describe('typing test',()=>{
     await page.getByRole('textbox',{name:'Search tools'}).fill('');
     if(!isMobile(testInfo.project.name)){
       await page.locator('.directory-chips').getByRole('button',{name:/^Utilities/}).click();
-      await expect(cards).toHaveCount(1);
+      await expect(cards.filter({hasText:'Typing Speed Test'})).toHaveCount(1);
       await page.locator('.directory-chips').getByRole('button',{name:/^PDF/}).click();
       await expect(cards.filter({hasText:'Typing Speed Test'})).toHaveCount(0);
     }

@@ -1,4 +1,5 @@
 ﻿'use client';
+import {beginToolAnalytics} from '@/lib/analytics';
 import {useEffect,useReducer,useRef,useState} from 'react';
 import Link from 'next/link';
 import {ArrowDown,ArrowUp,Activity,Wifi,Share2,Play,RotateCcw} from 'lucide-react';
@@ -37,6 +38,7 @@ export default function InternetSpeedTest({url}:{url:string}){
   const [manualShare,setManualShare]=useState('');
   const current=useRef<Worker|null>(null);
   const deadline=useRef<number|undefined>(undefined);
+  const measurement=useRef<ReturnType<typeof beginToolAnalytics>|null>(null);
   const busy=active(state);
   const hasResults=state.results.download!==null||state.results.upload!==null;
   const settled=state.phase!=='idle'&&!busy;
@@ -47,6 +49,7 @@ export default function InternetSpeedTest({url}:{url:string}){
       current.current.terminate();
       current.current=null;
       window.clearTimeout(deadline.current);
+      measurement.current?.('failed');
       dispatch({type:'finish',date:new Date().toISOString(),error:'Your connection went offline during the test. Reconnect to try again.'});
     }
     window.addEventListener('offline',disconnected);
@@ -68,9 +71,12 @@ export default function InternetSpeedTest({url}:{url:string}){
     if(current.current)return;
     setShareInfo('');
     setManualShare('');
+    measurement.current=beginToolAnalytics('internet-speed-test');
+    const measured=new Set<string>();
     dispatch({type:'start'});
     function fail(error:string){
       stop();
+      measurement.current?.('failed');
       dispatch({type:'finish',date:new Date().toISOString(),error});
     }
     if(!navigator.onLine){fail('You appear to be offline. Reconnect and try again.');return;}
@@ -87,7 +93,11 @@ export default function InternetSpeedTest({url}:{url:string}){
       worker.onmessage=(event:MessageEvent<MeasurementEvent>)=>{
         if(current.current!==worker)return;
         dispatch(event.data);
-        if(event.data.type==='finish')stop();
+        if(event.data.type==='result'&&Number.isFinite(event.data.mbps)&&event.data.mbps>0)measured.add(event.data.direction);
+        if(event.data.type==='finish'){
+          measurement.current?.(!event.data.error&&measured.size===2?'completed':'failed');
+          stop();
+        }
       };
       worker.onerror=()=>{
         if(current.current===worker)fail('The test worker could not run. Try again or use another browser.');

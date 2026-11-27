@@ -1,4 +1,5 @@
 'use client';
+import {beginToolAnalytics} from '@/lib/analytics';
 import {recordAdvancedCompletion} from '@/lib/advanced/activity';
 import {useCallback,useEffect,useRef,useState,type PointerEvent} from 'react';
 import {CloudUpload,Loader2,Undo2,Redo2,Download,ZoomIn,ZoomOut,RotateCw,Hand,Eraser,Paintbrush} from 'lucide-react';
@@ -37,11 +38,12 @@ export default function BackgroundRemover({layout='classic'}:{layout?:'classic'|
  function localInput(source:ImageData){const box=letterbox(source.width,source.height,512);const small=document.createElement('canvas');small.width=small.height=512;const ctx=small.getContext('2d',{willReadFrequently:true})!;ctx.fillStyle=PAD_FILL;ctx.fillRect(0,0,512,512);ctx.imageSmoothingQuality='high';ctx.drawImage(canvasFrom(source),box.x,box.y,box.w,box.h);return {pixels:ctx.getImageData(0,0,512,512).data,box}}
  async function segment(){
   const value=current.current;if(!value||running.current)return;
+  const measure=beginToolAnalytics('remove-background');
   running.current=true;const requestId=Date.now();active.current=requestId;const started=performance.now();
   setBusy(true);setError('');setReview('');setProgress(null);setStage('Preparing your image...');
   const source=value.source;let timeout:ReturnType<typeof setTimeout>|undefined;
   const finish=()=>{clearTimeout(timeout);timer.current=null;abort.current=null;running.current=false;setBusy(false);setProgress(null)};
-  const fail=(message:string)=>{setError(message);setStage('Background not removed. The preview is unchanged.')};
+  const fail=(message:string)=>{measure('failed');setError(message);setStage('Background not removed. The preview is unchanged.')};
   // Watchdog restarts on every worker message, so a slow (but progressing) model download is not killed.
   const arm=()=>{clearTimeout(timeout);timeout=setTimeout(()=>{worker.current?.terminate();worker.current=null;fail('Processing timed out on this device. Try manual refinement or a device with more memory.');finish()},180000);timer.current=timeout};
   // 1. Server engine (full BiRefNet at 1024) when it is configured and reachable.
@@ -78,6 +80,7 @@ export default function BackgroundRemover({layout='classic'}:{layout?:'classic'|
     const engine=server?`BiRefNet 1024 on the Editgoo server (${device(server.device)})`:`${kind==='portrait'?'MODNet portrait':'BiRefNet Lite 512'} in your browser (${device(event.data.backend)})${fallback?'; fallback because '+fallback:''}`;
     const modelSeconds=((server?server.inferenceMs:event.data.inferenceMs||0)/1000).toFixed(1);
     setStage(`${kind==='portrait'?'Portrait background removed.':'Foreground estimated.'} Engine: ${engine}. Model ${modelSeconds} s; total ${((performance.now()-started)/1000).toFixed(1)} s. Review before exporting.`);
+    measure('completed');
     finish();
    };
    worker.current.onerror=()=>{fail('The local AI worker could not start. Check browser WebAssembly support and available memory.');worker.current?.terminate();worker.current=null;finish()};

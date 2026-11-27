@@ -1,4 +1,5 @@
 'use client';
+import {beginToolAnalytics} from '@/lib/analytics';
 import {memo,useCallback,useEffect,useLayoutEffect,useRef,useState,type MutableRefObject} from 'react';
 import {flushSync} from 'react-dom';
 import dynamic from 'next/dynamic';
@@ -216,6 +217,7 @@ export default function TypingTest(){
   const sessionRef=useRef<TypingSession|null>(null);
   const testRef=useRef<Test|null>(null);
   const phaseRef=useRef(phase);
+  const measurement=useRef<ReturnType<typeof beginToolAnalytics>|null>(null);
   const finalizedRef=useRef(false);
   const composingRef=useRef(false);
   const offsetRef=useRef(0);
@@ -348,6 +350,8 @@ export default function TypingTest(){
       practice:test.prepared.practice,invalid,saved,storage:!!storage,newBest,previousBest};
     flushSync(()=>{setResult(res);setPhase('finished')});
     phaseRef.current='finished';
+    measurement.current?.('completed');
+    measurement.current=null;
     inputRef.current?.blur();
     setAnnouncement(`Test complete. ${fmtWpm(stats.net)} words per minute, ${fmtPct(stats.accuracy)} accuracy.`);
     resultsHeadingRef.current?.focus({preventScroll:true});
@@ -370,7 +374,7 @@ export default function TypingTest(){
       const ok=s.log[s.log.length-1].ok;
       spans?.[index]?.setAttribute('data-s',ok?'c':'x');
       playSound(ok);
-      if(!wasStarted){flushSync(()=>setPhase('running'));phaseRef.current='running';setAnnouncement('Test started.')}
+      if(!wasStarted){measurement.current=beginToolAnalytics('typing-test');flushSync(()=>setPhase('running'));phaseRef.current='running';setAnnouncement('Test started.')}
       if(s.ended){moveCaret();finalize();return}
       const test=testRef.current;
       if(test?.prepared.stream&&s.target.length-s.position<EXTEND_WHEN_REMAINING){

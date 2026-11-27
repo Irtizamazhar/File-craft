@@ -1,0 +1,38 @@
+.panel {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 110;
+  width: min(410px, calc(100% - 32px));
+  padding: 18px;
+  border: 1px solid #e6dce3;
+  border-radius: 16px;
+  background: #fff;
+  color: #11182e;
+  box-shadow: 0 12px 40px #11182e26;
+}
+.panel h2 { margin: 0 0 6px; font-size: 1.15rem; }
+.panel p { margin: 0 0 12px; font-size: .875rem; color: #434a5d; }
+.panel a { color: #ad233c; text-decoration: underline; }
+.toggle { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 650; }
+.toggle input { width: 19px; height: 19px; accent-color: #bc253e; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions button {
+  flex: 1;
+  min-height: 44px;
+  padding: 6px 10px;
+  border: 1px solid #8c8b99;
+  border-radius: 9px;
+  color: #11182e;
+  background: #fff;
+  font-weight: 700;
+}
+.actions button.primary { border-color: #ba233d; background: #ba233d; color: #fff; }
+.manage { border: 0; background: transparent; color: inherit; text-decoration: underline; min-height: 44px; }
+.actions button:focus-visible, .toggle input:focus-visible, .manage:focus-visible {
+  outline: 2px solid #ad233c;
+  outline-offset: 3px;
+}
+@media (max-width: 700px) {
+  .panel { bottom: calc(72px + env(safe-area-inset-bottom)); }
+}

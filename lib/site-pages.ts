@@ -69,15 +69,19 @@ export const contentPages:Record<string,ContentPage>={
       {heading:'Report a problem',paragraphs:['If you believe you have found a security issue, please report it through the contact form without including any personal data or confidential files.']},
     ]},
   cookies:{
-    eyebrow:'COOKIE POLICY',title:'Cookies and browser storage.',metaTitle:'Cookie Policy',updated:POLICY_UPDATED,
+    eyebrow:'COOKIE POLICY',title:'Cookies and browser storage.',metaTitle:'Cookie Policy',updated:'2026-11-27',
     subtitle:'Which cookies and browser storage Editgoo uses, and why.',
-    description:'The Editgoo cookie policy: the essential sign-in cookie, browser storage for saved tools and AI models, and future advertising consent.',
+    description:'The Editgoo Cookie Policy explains essential sign-in storage, optional Google Analytics cookies and how to change your choices.',
     blocks:[
       {heading:'Essential sign-in cookie',paragraphs:['When you sign in, Editgoo sets one essential cookie named fc_session. It is HttpOnly (scripts cannot read it), is sent only to this website and keeps you signed in for up to 14 days. Signing out deletes it and ends the session on the server. The site works without it, but you cannot use account features.']},
       {heading:'Saved tool shortcuts',paragraphs:['If you save tools in your dashboard, the tool identifiers are kept in your browser\'s local storage on that device. They contain no file contents and are not sent to our servers.']},
       {heading:'Cached AI models',paragraphs:['The background remover downloads its AI model from Editgoo and may store it in your browser\'s cache storage so it does not have to download again. You can remove it by clearing site data in your browser.']},
       {heading:'Files you select',paragraphs:['Files you choose on the homepage are kept in browser memory only to pass them to the tool you open. They are not written to cookies or local storage.']},
-      {heading:'Analytics and advertising',paragraphs:['Editgoo does not currently use analytics or advertising cookies. If we add advertising in future (for example Google AdSense), Google and its partners may use cookies to serve and measure ads. Before that happens we will update this policy and, where the law requires it, ask for your consent.']},
+      {id:'analytics-cookies',heading:'Optional analytics cookies',paragraphs:[
+        'If you accept analytics and Google Analytics is configured, it may set first-party cookies such as _ga and _ga_<ID> to distinguish browsers and keep track of session state. Editgoo configures a 180-day cookie lifetime without extending it on each visit. Your browser can apply a shorter limit.',
+        'Editgoo stores your analytics choice in local storage on this browser. Use Cookie settings in the footer to change it at any time. Rejecting or withdrawing consent stops future analytics measurement and removes accessible Google Analytics cookies from this site. Previously collected data is handled under the analytics retention settings.',
+        'Editgoo does not use this choice to enable advertising. Essential sign-in and tool storage are separate.'
+      ]},
       {heading:'Managing cookies',paragraphs:['You can delete cookies and site data at any time in your browser settings. Blocking the essential cookie stops you from signing in, but the tools still work.']},
     ]},
   privacy:{
@@ -97,8 +101,12 @@ export const contentPages:Record<string,ContentPage>={
       {heading:'Contact messages',paragraphs:['When you use the contact form, we store your name, email address and message in our database so we can reply.']},
       {heading:'Technical and security information',paragraphs:['To limit abuse, our server briefly keeps your IP address in memory when you sign in, register, send a message or use server background removal. Like most websites, our hosting infrastructure may also record standard request logs, such as IP address, browser type, requested page and time, for security and troubleshooting.']},
       {heading:'Cookies and browser storage',paragraphs:['We use one essential sign-in cookie, plus local storage and cache storage on your device for saved tools and AI models. The Cookie Policy has the details.']},
-      {heading:'How we use information',paragraphs:['We use this information only to provide and secure your account, show your activity, reply to messages, prevent abuse and keep the service running. We do not sell your personal information.']},
-      {heading:'Advertising and analytics',paragraphs:['Editgoo does not currently show ads or use analytics tools. If we introduce advertising such as Google AdSense, Google and its partners may use cookies or similar technologies to serve ads based on your visits to this and other websites. We will update this policy and provide consent choices where required before that starts. You can learn more at policies.google.com/technologies/ads.']},
+      {heading:'How we use information',paragraphs:['We use information to provide and secure your account, show your activity, reply to messages, prevent abuse and keep the service running. If you allow analytics, we use it to understand how people use our pages and tools. We do not sell your personal information.']},
+      {id:'google-analytics',heading:'Optional Google Analytics',paragraphs:[
+        'When Google Analytics 4 is configured and you accept analytics, your browser sends Google public page paths and tool usage events with the tool identifier and whether it started, completed or failed. Editgoo excludes URL query strings, uploaded files, filenames, document contents, form values, passwords, email addresses and account identifiers from these events.',
+        'Google Analytics uses browser and device information and cookies to measure visits. Google uses IP addresses for purposes such as deriving approximate location. Analytics retention depends on the property settings and the type of report.',
+        'Analytics is off until you accept it. You can reject it or withdraw permission from Cookie settings in the footer. Analytics consent does not enable advertising.'
+      ],link:{href:'https://policies.google.com/technologies/partner-sites',label:'How Google uses data from partner sites'}},
       {heading:'How long we keep information',paragraphs:['Account details and activity records are kept until you ask us to delete your account. Sessions expire after 14 days or when you sign out. Contact messages are kept until we delete them after handling your request.']},
       {heading:'Your choices and rights',paragraphs:[`You can update your name and password in your dashboard. To ask for a copy, correction or deletion of your personal information, or to delete your account, ${contactRoute}. Depending on where you live, you may have additional rights under local privacy law.`]},
       {heading:'Children',paragraphs:['Editgoo is not directed at children under 13, and we do not knowingly collect their personal information.']},

@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import Brand from './Brand';
+import AnalyticsConsent from './AnalyticsConsent';
+import {guides} from '@/lib/guides';
+import {sectionIds} from '@/lib/site-pages';
 
 const navigation=[
   {title:'Tools',links:[['All tools','/tools'],['PDF tools','/pdf-tools'],['Document tools','/document-tools'],['Image tools','/image-tools'],['Typing Speed Test','/typing-test']]},
@@ -15,6 +18,6 @@ export default function Footer(){
       <div className="footer-intro"><Brand/><p>Online tools for PDFs, images and documents. Most tools run right in your browser.</p></div>
       {navigation.map(({title,links})=><div key={title}><h2>{title}</h2>{links.map(([label,href])=><Link href={href} key={href}>{label}</Link>)}</div>)}
     </nav>
-    <div className="container footer-bottom"><span>© {new Date().getFullYear()} Editgoo. All rights reserved.</span></div>
+    <div className="container footer-bottom"><span>© {new Date().getFullYear()} Editgoo. All rights reserved.</span><AnalyticsConsent paths={[...sectionIds.map(id=>'/'+id),...guides.map(({slug})=>'/guides/'+slug)]}/></div>
   </footer>;
 }

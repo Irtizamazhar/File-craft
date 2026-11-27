@@ -1,4 +1,5 @@
 'use client';
+import {beginToolAnalytics} from '@/lib/analytics';
 import {useEffect,useRef,useState} from 'react';
 import {CheckCircle2,Loader2,Plus,TriangleAlert} from 'lucide-react';
 import {processFile,validateInput,type ProcessedFile} from '@/lib/browser-engine';
@@ -69,15 +70,15 @@ export default function CatalogWorkspace({tool}:{tool:Tool}){
     if(running.current||checking)return;
     if(!files.length){setHint('Add a file first.');return}
     if(TWO_FILES.includes(tool.slug)&&files.length<2){setError('Select at least two files.');return}
-    running.current=true;setBusy(true);setError('');setHint('');resetResults();
+    const measure=beginToolAnalytics(tool.slug);running.current=true;setBusy(true);setError('');setHint('');resetResults();
     try{
       const outputs:ProcessedFile[]=await processFile(tool.slug,files,options);
       if(!outputs.length||outputs.some(x=>!x.blob.size))throw Error('No usable output was produced.');
       const cleaned=outputName.trim().replace(/[^a-zA-Z0-9_.-]/g,'_').replace(/\.[^.]+$/,'').slice(0,75);
       const items=outputs.map(x=>({name:cleaned&&outputs.length===1?cleaned+'.'+x.name.split('.').pop():x.name,size:x.blob.size,url:URL.createObjectURL(x.blob),blob:x.blob}));
-      urls.current=items.map(x=>x.url);setResults(items);
+      urls.current=items.map(x=>x.url);setResults(items);measure('completed');
       void fetch('/api/activity',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tool:tool.slug,status:'completed'})}).catch(()=>{});
-    }catch(e){setError(e instanceof Error?e.message:'This file could not be processed.')}finally{running.current=false;setBusy(false)}
+    }catch(e){measure('failed');setError(e instanceof Error?e.message:'This file could not be processed.')}finally{running.current=false;setBusy(false)}
   }
   // Adjusting the options (or the files) answers an error, so the button goes back to "Process N files".
   const changeOption=(key:string,value:string)=>{resetResults();setError('');setOptions(prev=>({...prev,[key]:value}))};

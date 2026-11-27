@@ -51,5 +51,5 @@ export default async function Section({params}:Props){
   const page=contentPages[id];
   if(!page)notFound();
   return <><section className="subpage-hero"><div className="container"><span className="eyebrow">{page.eyebrow}</span><h1>{page.title}</h1><p>{page.subtitle}</p>{page.updated&&<p className="page-updated">Last updated: {page.updated}</p>}</div></section>
-  <section className="simple-section"><div className="container article-list">{page.blocks.map((block,i)=><article key={block.heading}><span className="article-number">{String(i+1).padStart(2,'0')}</span><div><h2>{block.heading}</h2>{block.paragraphs.map(text=><p key={text}>{text}</p>)}{block.list&&<ul>{block.list.map(item=><li key={item}>{item}</li>)}</ul>}</div></article>)}</div></section></>;
+  <section className="simple-section"><div className="container article-list">{page.blocks.map((block,i)=><article key={block.heading} id={block.id}><span className="article-number">{String(i+1).padStart(2,'0')}</span><div><h2>{block.heading}</h2>{block.paragraphs.map(text=><p key={text}>{text}</p>)}{block.link&&<p><a className="inline-link" href={block.link.href}>{block.link.label}</a></p>}{block.list&&<ul>{block.list.map(item=><li key={item}>{item}</li>)}</ul>}</div></article>)}</div></section></>;
 }

@@ -3,7 +3,7 @@ import {businessName, publicContact} from './site';
 /** Content for the single-segment routes served by app/[section]/page.tsx. */
 
 export type CatalogSection={eyebrow:string;title:string;subtitle:string;category:string};
-export type PageBlock={heading:string;paragraphs:string[];list?:string[]};
+export type PageBlock={heading:string;paragraphs:string[];list?:string[];id?:string;link?:{href:string;label:string}};
 export type ContentPage={eyebrow:string;title:string;subtitle:string;metaTitle:string;description:string;updated?:string;blocks:PageBlock[]};
 
 const POLICY_UPDATED='25 November 2026';
@@ -88,7 +88,11 @@ export const contentPages:Record<string,ContentPage>={
       {heading:'Who we are',paragraphs:[`${operatedBy} For privacy questions or requests, ${contactRoute}.`]},
       {heading:'Files processed in your browser',paragraphs:['Most Editgoo tools, including the PDF, document, image and file compression tools and the PDF editor, read and process your files inside your web browser. The file contents are not uploaded to Editgoo, and the results are created in your browser tab. We cannot see or recover these files.']},
       {heading:'Images sent to our server for background removal',paragraphs:['The background remover can use a server engine when the site operator enables it. In that case the image you choose is sent over an encrypted connection to the Editgoo server, processed in memory to create the cutout mask and returned to your browser. It is not stored, logged or shared with third-party AI services. When the server engine is not available, the background remover runs entirely in your browser. The tool shows which engine it uses.']},
-      {heading:'Internet Speed Test',paragraphs:['When you agree and start an Internet Speed Test, your browser connects directly to Measurement Lab (M-Lab). The test transfers data and may use your mobile allowance. M-Lab collects your public IP address and test measurements and publishes measurement data for research. Its privacy policy at measurementlab.net/privacy explains collection and publication. Editgoo does not store your speed-test measurements or the IP address reported by the measurement service.']},
+      {id:'internet-speed-test',heading:'Internet Speed Test',paragraphs:[
+        'When you agree and start the Internet Speed Test, your browser connects directly to Measurement Lab (M-Lab) and runs its NDT7 test. Download and upload traffic uses internet bandwidth and can count toward your mobile data allowance.',
+        'M-Lab collects your public IP address, test measurements and related information such as when the test ran. M-Lab publishes measurement data that can include your public IP address for research and retains measurement data indefinitely under its privacy policy.',
+        'Editgoo displays the results in your browser. The speed test does not send your measurements or the IP address reported by M-Lab to Editgoo for storage.'
+      ],link:{href:'https://www.measurementlab.net/privacy/',label:'M-Lab Privacy Policy'}},
       {heading:'Account information',paragraphs:['Accounts are optional. If you register, we store the following in our MySQL database:'],list:['Your name and email address.','Your password as a salted scrypt hash, never as plain text.','A hashed session token and its expiry date while you are signed in.','Your plan (currently the free plan).','While signed in, a record of completed tools: the tool name, a status and a timestamp. File names and file contents are never recorded.']},
       {heading:'Contact messages',paragraphs:['When you use the contact form, we store your name, email address and message in our database so we can reply.']},
       {heading:'Technical and security information',paragraphs:['To limit abuse, our server briefly keeps your IP address in memory when you sign in, register, send a message or use server background removal. Like most websites, our hosting infrastructure may also record standard request logs, such as IP address, browser type, requested page and time, for security and troubleshooting.']},

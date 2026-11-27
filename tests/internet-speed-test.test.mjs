@@ -39,7 +39,19 @@ test('state machine prevents duplicate starts, preserves partial results and res
   state=reduce(state,{type:'start'});
   assert.deepEqual(state.results,initial.results);
   assert.equal(reduce(state,{type:'cancel'}).phase,'cancelled');
-  assert.equal(reduce(state,{type:'finish',date:'2026-11-27'}).phase,'completed');
+  assert.equal(reduce(state,{type:'finish',date:'2026-11-27'}).phase,'failed');
+});
+
+test('completion requires positive measurements from both active directions',()=>{
+  let state=reduce(initial,{type:'start'});
+  state=reduce(state,{type:'phase',direction:'download'});
+  assert.equal(reduce(state,{type:'live',direction:'upload',mbps:10}),state);
+  assert.equal(reduce(state,{type:'result',direction:'download',mbps:Infinity,ping:null}),state);
+  state=reduce(state,{type:'result',direction:'download',mbps:1,ping:null});
+  assert.match(reduce(state,{type:'finish',date:''}).error,/Upload/);
+  state=reduce(state,{type:'phase',direction:'upload'});
+  state=reduce(state,{type:'result',direction:'upload',mbps:2,ping:null});
+  assert.equal(reduce(state,{type:'finish',date:''}).phase,'completed');
 });
 
 test('NDT7 server microseconds and SDK client seconds remain distinct',()=>{

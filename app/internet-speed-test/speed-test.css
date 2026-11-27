@@ -72,9 +72,9 @@
  .internet-result-actions .btn{font-size:.84rem;padding-inline:8px;gap:5px}
 }
 /* Keep the measurement and disclosure together with one set of metrics. */
-.internet-disclosure{max-width:59ch;margin:4px auto 0;text-align:center;color:#50586e;font-size:.875rem;line-height:1.5}
+.internet-disclosure{max-width:59ch;margin:0 auto;text-align:center;color:#50586e;font-size:.8125rem;line-height:1.45}
 .internet-disclosure a{color:#a72542;text-decoration:underline;text-underline-offset:2px}
-.internet-reading{min-height:2rem;align-items:center}
+.internet-reading{min-height:2rem;align-items:center;flex-wrap:wrap}
 .internet-pointer{transform-origin:140px 140px;transition:transform .24s ease}
 .internet-reading-source{text-align:center;color:#50586e;font-size:.875rem}
 @media(prefers-reduced-motion:reduce){.internet-pointer{transition:none}}

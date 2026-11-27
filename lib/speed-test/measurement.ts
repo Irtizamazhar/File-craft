@@ -12,12 +12,18 @@ export type State={
 export const initial:State={phase:'idle',live:null,results:{download:null,upload:null,ping:null},date:null};
 export const active=(state:State)=>['discovering','downloading','uploading'].includes(state.phase);
 
-export function reduce(state:State,event:MeasurementEvent|{type:'start'|'cancel'}):State {
+export function reduce(state:State,event:MeasurementEvent|{type:'start'}|{type:'cancel'}):State {
   if(event.type==='start')return active(state)?state:{...initial,phase:'discovering'};
   if(!active(state))return state;
   if(event.type==='cancel')return {...state,phase:'cancelled',live:null};
-  if(event.type==='finish')return {...state,phase:event.error?'failed':'completed',live:null,date:event.date,error:event.error};
+  if(event.type==='finish'){
+    const missing=(['download','upload'] as const).filter(direction=>state.results[direction]===null);
+    const error=event.error??(missing.length===2?'Download and upload tests could not finish.':
+      missing.length===1?(missing[0]==='download'?'Download':'Upload')+' test could not finish.':undefined);
+    return {...state,phase:error?'failed':'completed',live:null,date:event.date,error};
+  }
   if(event.type==='phase')return {...state,phase:event.direction==='download'?'downloading':'uploading',live:null};
+  if(state.phase!==(event.direction==='download'?'downloading':'uploading')||!Number.isFinite(event.mbps)||event.mbps<=0)return state;
   if(event.type==='live')return {...state,live:event.mbps};
   if(event.type==='result')return {...state,uploadSource:event.direction==='upload'?event.source:state.uploadSource,results:{...state.results,[event.direction]:event.mbps,ping:state.results.ping??event.ping}};
   return state;

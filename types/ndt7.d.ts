@@ -3,7 +3,7 @@
   type ServerSample={AppInfo?:{ElapsedTime?:number;NumBytes?:number};TCPInfo?:{MinRTT?:number}};
   export type Sample={Source:'client';Data:ClientSample}|{Source:'server';Data:ServerSample};
   export type Summary={LastClientMeasurement?:ClientSample;LastServerMeasurement?:ServerSample};
-  type Options={downloadworkerfile:string;uploadworkerfile:string;userAcceptedDataPolicy:boolean};
+  type Options={downloadworkerfile?:string;uploadworkerfile:string;userAcceptedDataPolicy:boolean};
   type URLs=Partial<Record<'///ndt/v7/download'|'///ndt/v7/upload',string>>;
   const ndt7:{
     downloadTest(options:Options,callbacks:{downloadStart:()=>void;downloadMeasurement:(value:Sample)=>void;

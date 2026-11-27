@@ -1,5 +1,6 @@
 ﻿'use client';
 import {useEffect,useReducer,useRef,useState} from 'react';
+import Link from 'next/link';
 import {ArrowDown,ArrowUp,Activity,Wifi,Share2,Play,RotateCcw} from 'lucide-react';
 import {active,format,initial,reduce,type MeasurementEvent} from '@/lib/speed-test/measurement';
 
@@ -117,9 +118,9 @@ export default function InternetSpeedTest({url}:{url:string}){
   }
 
   const reading=busy?state.live:state.results.download??state.results.upload;
+  const readingLabel=(busy?state.phase==='uploading':state.results.download===null)?'Upload':'Download';
   const disclosure=<p id="speed-privacy" className="internet-disclosure">
-    Uses internet data. Tests run through M-Lab, which collects your public IP and publishes measurement data.
-    Starting a test means you agree to this measurement. <a href="https://www.measurementlab.net/privacy/" target="_blank" rel="noopener noreferrer">M-Lab Privacy Policy</a>
+    By starting, you agree to use internet data and let M-Lab collect and publish test data, including your public IP. <Link href="/privacy#internet-speed-test" prefetch={false}>Privacy details</Link>
   </p>;
 
   return <div className="internet-tool">
@@ -127,17 +128,17 @@ export default function InternetSpeedTest({url}:{url:string}){
     <div className="internet-measurement">
       <Gauge value={reading}/>
       <div className="internet-reading" data-testid="speed-live">
-        {reading!==null?<><strong>{format(reading)}</strong><span>Mbps</span></>:busy?
+        {reading!==null?<><span>{readingLabel}</span><strong>{format(reading)}</strong><span>Mbps</span></>:busy?
           <progress aria-label="Waiting for a measurement"/>:<strong aria-hidden="true">&mdash;</strong>}
       </div>
       <p role="status" className="internet-status">{statuses[state.phase]}</p>
+      {state.phase==='idle'&&disclosure}
       <div className="internet-actions">{(!settled||busy)&&(
         busy?<button type="button" className="btn btn-outline" onClick={()=>{stop();dispatch({type:'cancel'})}}>Cancel test</button>:
           <button type="button" className="btn btn-primary" aria-describedby="speed-privacy" onClick={start}>
             <Play size={19} aria-hidden="true"/> Start Test
           </button>)}
       </div>
-      {state.phase==='idle'&&disclosure}
     </div>
     </div>
     <div className="internet-results">
@@ -151,10 +152,10 @@ export default function InternetSpeedTest({url}:{url:string}){
       })}</dl>
       {state.uploadSource==='client'&&<p className="internet-reading-source">Upload measured by your browser.</p>}
       {state.error&&<p role="alert" className="internet-error">{state.error}</p>}
+      {settled&&disclosure}
       {settled&&<div className="internet-result-actions"><button type="button" className="btn btn-primary" aria-describedby="speed-privacy" onClick={start}><RotateCcw size={18} aria-hidden="true"/>Test Again</button>{hasResults&&state.date&&<button type="button" className="btn btn-outline internet-share" onClick={share}>
         <Share2 size={17} aria-hidden="true"/>{typeof navigator!=='undefined'&&typeof navigator.share==='function'?'Share Result':'Copy Results'}
       </button>}</div>}
-      {settled&&disclosure}
       {shareInfo&&<p role="status">{shareInfo}</p>}
       {manualShare&&<textarea aria-label="Results to copy" readOnly value={manualShare} onFocus={event=>event.target.select()}/>}
     </div>

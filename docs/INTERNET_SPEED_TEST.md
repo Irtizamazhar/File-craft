@@ -1,58 +1,40 @@
-﻿# Editgoo Internet Speed Test
+﻿# Editgoo Internet Speed Test reliability
 
-Route: `https://www.editgoo.com/internet-speed-test`. Changes in this report are local.
+## Findings
 
-## Upload diagnosis and fix
+- Download previously selected only the first Locate result. A rejected upgrade left no alternate even when Locate returned another usable endpoint. The installed NDT7 0.1.5 download worker counts text frames in its client byte total, emits samples only when a message arrives after the sampling interval, and does not capture final counters or distinguish close codes. Local TLS fixtures reproduced opening rejection, a transfer that ends before the first sample, control-only traffic and an abnormal close after a valid sample.
+- Upload previously required AppInfo in the last server message. The SDK can report a later message without AppInfo even after valid server measurements or client transfers. The worker retains the most recent valid server and browser samples and prefers server-received throughput. The fallback uses SDK payload bytes queued minus bytes still buffered and is labeled browser-measured. The close adapter corrects a separate problem in the installed SDK, which reports a generic completion message on an abnormal close.
+- The two live observations establish that each direction had reported a result on a separate run. The legacy opening error does not identify whether a server, access token, TLS handshake or network caused that session to fail. No live request diagnostics were available.
 
-The installed `@m-lab/ndt7` version is 0.1.5. The existing application ignored the SDK upload worker's `Source: client` messages and read throughput from `LastServerMeasurement.AppInfo` alone. The protocol makes `AppInfo` optional, and the SDK summary retains the last server packet even when it has no application counters. Either condition could yield Upload N/A after bytes had been sent. Local TLS fixtures reproduce both conditions. The exact cause of the reported live session remains unverified.
+## Changes
 
-The worker now retains each direction's latest valid app-level sample. Upload prefers the server's bytes received, and uses the SDK's browser-side bytes sent minus queued bytes if server throughput is unavailable. The UI and share text label the browser fallback. SDK `ElapsedTime` is in seconds. Server `AppInfo.ElapsedTime` is in microseconds and converted separately. Both calculations use bytes × 8 ÷ seconds ÷ 1,000,000.
+The browser worker consumes direction-specific Locate URLs and preserves their access tokens. It can try one alternate download endpoint after a failed opening handshake. Once a download opens, it measures binary payload bytes only, publishes real samples and calculates a final result on clean close. Download proceeds to upload even if discovery supplied no usable download endpoint or the download timed out. The existing SDK still handles upload pacing and consent. Server AppInfo elapsed time is in microseconds, SDK upload client elapsed time is in seconds, and native download timestamps are converted from milliseconds. All displayed throughput is in Mbps.
 
-Discovery validates the separate secure endpoints and keeps each embedded access token. A missing endpoint can leave the other direction usable. Each phase requires a start, a completion callback, a zero SDK status, a valid sample and no callback error. Phase watchdogs stop ahead of the SDK watchdogs that can resolve with code zero. Cancellation, timeouts and offline events terminate the session worker. Older worker events cannot overwrite newer results. Development diagnostics log a direction and sanitized outcome code only. The browser cannot distinguish all possible server rejection or network causes from a WebSocket error.
+A run completes only with two validated measurements. Interrupted directions show N/A with phase-specific feedback, while successful measurements remain available for sharing. The gauge identifies the measured direction and uses indeterminate progress until data arrives. Ping is sourced from the download server's minimum TCP RTT and jitter remains N/A. Development diagnostics report sanitized stage, sample, outcome, timeout and SDK status fields.
 
-Ping remains the minimum TCP RTT reported by the download server. Jitter remains N/A. No provider credentials or SDK upgrade were needed. [NDT7 JavaScript client](https://github.com/m-lab/ndt7-js) · [NDT7 protocol and units](https://github.com/m-lab/ndt-server/blob/main/spec/ndt7-protocol.md) · [Locate API](https://www.measurementlab.net/develop/locate-v2/)
-
-## Interface and consent
-
-Start Test and Test Again are measurement-specific affirmative actions. Each appears beside the visible data-use, public IP and publication notice with a link to M-Lab's policy. Clicking either button passes `userAcceptedDataPolicy=true` for that run. No checkbox, persistent consent, automatic test, or background retry is involved.
-
-M-Lab documents affirmative acceptance in the SDK. Its public policies do not prescribe a separate checkbox. EDPB guidance describes informed, specific and unambiguous affirmative action. This design applies that guidance to this optional measurement, separate from general site terms. Jurisdiction-specific legal approval was outside this implementation. [M-Lab acceptable use](https://www.measurementlab.net/aup/) · [M-Lab privacy policy](https://www.measurementlab.net/privacy/) · [EDPB consent guidance](https://www.edpb.europa.eu/sme/be-compliant/process-personal-data-lawfully_en)
-
-The UI now has one set of result cards. The gauge shows an indeterminate indicator while connecting or waiting for the first sample, then displays measured speed. The needle transitions with reduced-motion support. Failures retain valid partial results. Sharing includes measured values and no IP address.
-
-## Files modified in this pass
-
-- `app/internet-speed-test/InternetSpeedTest.tsx`
-- `app/internet-speed-test/page.tsx`
-- `app/internet-speed-test/speed-test.css`
-- `lib/speed-test/measurement.ts`
-- `lib/speed-test/ndt.worker.ts`
-- `types/ndt7.d.ts`
-- `tests/browser/internet-speed-test.spec.ts`
-- `tests/internet-speed-test.test.mjs`
-- `docs/INTERNET_SPEED_TEST.md`
-
-Prior typing and SEO changes in the working tree were kept outside this pass.
+A short consent notice appears next to Start Test and Test Again. Its link opens the Privacy Policy section covering NDT7, browser initiation, bandwidth, public IP collection, publication and retention. No provider request is made before the user starts a test. [NDT7 protocol](https://github.com/m-lab/ndt-server/blob/main/spec/ndt7-protocol.md) · [M-Lab JavaScript client](https://github.com/m-lab/ndt7-js) · [Locate v2](https://www.measurementlab.net/develop/locate-v2/) · [M-Lab Privacy Policy](https://www.measurementlab.net/privacy/)
 
 ## Verification
 
-- **PASSED** TypeScript, ESLint, 63 unit tests and the production build.
-- **PASSED** 27 distinct Playwright checks across desktop Chromium, mobile Chromium and WebKit against local TLS fixtures. One WebKit poll missed a brief upload state even though the test completed with a browser-measured upload. The fixture now observes actual gauge changes and passed on all three profiles in a focused rerun. Coverage includes a final packet without AppInfo, browser-only upload, upload WebSocket rejection, partial results, timeout, cancellation, worker errors, stale events, retry and both share paths.
-- **PASSED** Keyboard activation, the policy notice and link, zero discovery requests before Start Test, automated accessibility, and no horizontal overflow at 320, 375, 390, 430, 768, 1024 and 1440 px.
-- **PASSED** Four Chromium regressions covered real Merge PDF and Resize Image outputs, Typing Speed Test directory discovery and signup validation UI.
-- **NOT TESTED** Live M-Lab. No explicit live-test consent was provided. Local TLS fixtures exercise the actual SDK workers against test traffic. They cannot confirm that a live M-Lab upload now succeeds.
+- **PASSED** TypeScript, ESLint, 64 unit tests and production build.
+- **PASSED** 57 distinct Playwright cases across desktop Chromium, mobile Chromium and WebKit over multiple runs. Tests use the production standalone build with local TLS WebSockets and intercepted Locate responses. Chromium passed the full-duration test with the unmodified SDK and server-side backpressure. The fixture verified positive browser-to-server binary bytes. WebKit passed with a shorter SDK send loop and smaller chunks, which the fault scenarios also use to bound loopback traffic.
+- **FAILED** The separate full-duration WebKit loopback attempt exhausted the automation worker's heap. A rerun with server backpressure reached the upload watchdog. WebKit's bounded fixture passed. Full-duration WebKit reliability remains unverified.
+- **PASSED** Keyboard consent, no automatic provider request, privacy anchor, direction labels, indeterminate progress, partial sharing, automated accessibility and no horizontal overflow at 320, 375, 390, 430, 768, 1024 and 1440 px. Desktop and mobile captures were visually reviewed.
+- **PASSED** Four Chromium regression checks cover actual Merge PDF and Resize Image outputs, Typing Speed Test discovery and signup validation.
+- **LIVE NDT7 TEST — NOT TESTED.** Explicit consent for a live bandwidth test was unavailable. A single authorized test must still confirm two positive results and the completed state against the real service.
 
-[Desktop capture](../artifacts/speed-test-polish/idle-1440.png) · [Mobile capture](../artifacts/speed-test-polish/idle-390.png)
+[Desktop capture](../artifacts/speed-test-reliability/idle-1440.png) · [Mobile capture](../artifacts/speed-test-reliability/idle-390.png)
 
-## Manual push after review
+## Files and manual Git commands
 
-Run on the existing `main` checkout only when ready to push. Confirm that the index contains only the intended changes, especially if the repository has a deployment trigger.
+The paths in the staging command list the complete change set. Run these commands manually from the repository root on the intended main checkout when ready to publish.
 
 ```powershell
-git status --short
-git add -- app/internet-speed-test/InternetSpeedTest.tsx app/internet-speed-test/page.tsx app/internet-speed-test/speed-test.css lib/speed-test/measurement.ts lib/speed-test/ndt.worker.ts types/ndt7.d.ts tests/browser/internet-speed-test.spec.ts tests/internet-speed-test.test.mjs docs/INTERNET_SPEED_TEST.md
+git status --short --branch
+git add -- ':(literal)app/[section]/page.tsx' app/internet-speed-test/InternetSpeedTest.tsx app/internet-speed-test/speed-test.css docs/INTERNET_SPEED_TEST.md lib/site-pages.ts lib/speed-test/measurement.ts lib/speed-test/ndt.worker.ts lib/speed-test/upload-socket.worker.js tests/browser/internet-speed-test.spec.ts tests/internet-speed-test.test.mjs types/ndt7.d.ts
 git diff --cached --check
+git diff --cached --stat
 git diff --cached
-git commit -m "Fix Editgoo upload speed reporting and simplify test consent"
+git commit -m "Fix incomplete Editgoo internet speed measurements"
 git push origin main
 ```

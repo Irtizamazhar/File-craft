@@ -32,7 +32,7 @@ export async function generateMetadata({params}:Props):Promise<Metadata>{
   if(!isSection(section))notFound();
   const canonical='/'+section;
   const catalog=catalogSections[section],page=contentPages[section],component=componentMeta[section];
-  const title=catalog?.title||page?.metaTitle||component.title;
+  const title=catalog?.metaTitle||page?.metaTitle||component.title;
   const description=catalog?.subtitle||page?.description||component.description;
   return pageMetadata({title,description,path:canonical});
 }

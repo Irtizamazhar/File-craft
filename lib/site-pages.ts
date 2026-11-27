@@ -2,7 +2,7 @@ import {businessName, publicContact} from './site';
 
 /** Content for the single-segment routes served by app/[section]/page.tsx. */
 
-export type CatalogSection={eyebrow:string;title:string;subtitle:string;category:string};
+export type CatalogSection={eyebrow:string;title:string;metaTitle:string;subtitle:string;category:string};
 export type PageBlock={heading:string;paragraphs:string[];list?:string[];id?:string;link?:{href:string;label:string}};
 export type ContentPage={eyebrow:string;title:string;subtitle:string;metaTitle:string;description:string;updated?:string;blocks:PageBlock[]};
 
@@ -12,10 +12,10 @@ const operatedBy=businessName?`Editgoo (www.editgoo.com) is operated by ${busine
 const contactRoute=publicContact?`email ${publicContact} or use the contact form at www.editgoo.com/contact`:'use the contact form at www.editgoo.com/contact';
 
 export const catalogSections:Record<string,CatalogSection>={
-  'convert-tools':{eyebrow:'EDITGOO / CONVERT',title:'A fresh format. A simpler task.',category:'Convert',subtitle:'Convert supported PDF, document and image formats. Each tool lists its limitations before you start.'},
-  'pdf-tools':{eyebrow:'EDITGOO / PDF',title:'Every PDF task, simplified.',category:'PDF',subtitle:'Merge, split, rotate, compress and arrange PDF files in your browser.'},
-  'document-tools':{eyebrow:'EDITGOO / DOCUMENTS',title:'Documents, your way.',category:'Document',subtitle:'Convert Word documents, spreadsheets, slides and text files.'},
-  'image-tools':{eyebrow:'EDITGOO / IMAGES',title:'Images that fit the job.',category:'Image',subtitle:'Convert, resize, compress and clean up images in your browser.'},
+  'convert-tools':{eyebrow:'EDITGOO / CONVERT',title:'A fresh format. A simpler task.',metaTitle:'File Converters for PDF, Documents and Images',category:'Convert',subtitle:'Convert supported PDF, document and image formats. Each tool lists its limitations before you start.'},
+  'pdf-tools':{eyebrow:'EDITGOO / PDF',title:'Every PDF task, simplified.',metaTitle:'Online PDF Tools to Merge, Split and Compress',category:'PDF',subtitle:'Merge, split, rotate, compress and arrange PDF files in your browser.'},
+  'document-tools':{eyebrow:'EDITGOO / DOCUMENTS',title:'Documents, your way.',metaTitle:'Document Tools for Word, Spreadsheets and Slides',category:'Document',subtitle:'Convert Word documents, spreadsheets, slides and text files.'},
+  'image-tools':{eyebrow:'EDITGOO / IMAGES',title:'Images that fit the job.',metaTitle:'Online Image Tools to Resize, Compress and Convert',category:'Image',subtitle:'Convert, resize, compress and clean up images in your browser.'},
 };
 
 /** Sections with their own component rather than a content page. */

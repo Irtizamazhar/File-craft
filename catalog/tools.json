@@ -510,7 +510,7 @@
     "slug": "png-to-jpg",
     "name": "PNG to JPG",
     "category": "Image",
-    "description": "Convert PNG to JPG with a white transparent background.",
+    "description": "Convert PNG to JPG and replace transparent areas with white.",
     "accept": ".png",
     "multi": false,
     "controls": [],

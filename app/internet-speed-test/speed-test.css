@@ -1,6 +1,6 @@
 ﻿.internet-page{max-width:1050px;padding-block:32px 14px}
 .internet-page h1{font-size:clamp(2rem,5vw,3.3rem);letter-spacing:-.05em;line-height:1.12;margin:16px 0 24px}
-.internet-panel{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,1fr);gap:24px;border:1px solid #e5e5ec;border-radius:24px;padding:clamp(16px,4vw,36px);background:#fff;box-shadow:0 12px 35px #22213a0c}
+.internet-panel{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;border:1px solid #e5e5ec;border-radius:24px;padding:clamp(16px,4vw,36px);background:#fff;box-shadow:0 12px 35px #22213a0c}
 .internet-measurement{display:flex;align-items:center;flex-direction:column;justify-content:center;min-width:0;gap:9px}
 .internet-gauge{position:relative;width:min(100%,310px);aspect-ratio:280/158}
 .internet-gauge svg{display:block;width:100%;height:100%;overflow:visible}
@@ -11,7 +11,7 @@
 .internet-gauge text{font-size:11px;fill:#565b6e}
 .internet-reading{display:flex;align-items:baseline;justify-content:center;gap:6px;min-width:0;max-width:100%}
 .internet-reading strong{font-size:clamp(1.55rem,5vw,2.6rem);letter-spacing:-.045em;line-height:1;overflow-wrap:anywhere;text-align:center;font-variant-numeric:tabular-nums}
-.internet-reading span,.internet-status,.internet-provider{color:#50586e;font-size:.9rem}
+.internet-reading span,.internet-status{color:#50586e;font-size:.9rem}
 .internet-status{margin:5px 0;min-height:1.5em;text-align:center}
 .internet-measurement progress{max-width:100%;width:180px;height:8px;accent-color:#bd2340}
 .internet-actions{margin-top:4px;width:min(100%,215px)}
@@ -24,14 +24,9 @@
 .internet-metric dd{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;margin:9px 0 0;font-variant-numeric:tabular-nums}
 .internet-metric strong{font-size:clamp(1.05rem,3vw,1.7rem);line-height:1.15;overflow-wrap:anywhere}
 .internet-metric dd span{color:#50586e;font-size:.8rem}
-.internet-provider,.internet-results p{margin:0}
+.internet-results p{margin:0}
 .internet-error{color:#9b2340}
 .internet-results textarea{max-width:100%;min-height:130px}
-.internet-consent{border:1px solid #e8e7ee;border-radius:14px;padding:11px 15px 4px;color:#4f566c;font-size:.9rem;background:#fffafa}
-.internet-consent p{margin:0 0 6px}
-.internet-consent a{color:#a72542;text-decoration:underline;text-underline-offset:2px}
-.internet-consent label{display:flex;align-items:center;gap:10px;min-height:44px;font-weight:650}
-.internet-consent input{width:19px;height:19px;accent-color:#bc2844;flex-shrink:0}
 .internet-instructions{max-width:700px;margin-top:32px}
 .internet-instructions h2{font-size:1.35rem;margin-bottom:8px}
 .internet-instructions p{color:#50586e}
@@ -47,13 +42,9 @@
 .internet-heading-icon{display:grid;place-items:center;flex:none;width:clamp(44px,7vw,78px);aspect-ratio:1;background:linear-gradient(145deg,#ff453f,#e50029 62%);color:white;border-radius:19%;box-shadow:0 6px 13px #e8002519}
 .internet-heading-icon svg{width:66%;height:66%}
 .internet-tool{display:grid;gap:18px}
-.internet-panel{grid-template-columns:minmax(0,1.85fr) minmax(0,1fr);align-items:center}
 .internet-gauge{width:min(100%,360px)}
 .internet-gauge .internet-needle{fill:#11182e;stroke:none}
 .internet-fill{stroke:url(#speed-red)}
-.internet-summary{list-style:none;margin:0;padding:0 0 0 clamp(15px,4vw,45px);display:grid;gap:12px;border-left:1px solid #dde1eb}
-.internet-summary li{display:flex;align-items:center;gap:17px;font-size:clamp(1rem,2vw,1.4rem);font-weight:800}
-.internet-summary span{width:52px;height:52px;flex:none;display:grid;place-items:center;background:#ffedf1;color:#c8002a;border-radius:13px}
 .internet-actions{width:min(100%,270px)}
 .internet-actions:empty{display:none}
 .internet-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:#fff;border:1px solid #e5e5ec;border-radius:18px;box-shadow:0 6px 18px #22213a09;padding-block:16px}
@@ -66,14 +57,12 @@
 .internet-metric:nth-child(3) dt svg{color:#7228b7}
 .internet-metric:nth-child(4) dt svg{color:#aa440a}
 .internet-metric dd{justify-content:center}
-.internet-provider{text-align:center}
 .internet-result-actions{display:flex;justify-content:center;gap:10px}
 .internet-result-actions .btn{width:min(50%,245px);min-width:0;min-height:44px;justify-content:center}
 .internet-error,.internet-results [role=status]{text-align:center}
 @media(max-width:700px){
  .internet-page h1{font-size:clamp(1.45rem,5.7vw,2rem)}
  .internet-panel{grid-template-columns:1fr}
- .internet-summary{display:none}
  .internet-gauge{max-width:260px}
  .internet-actions{width:100%}
  .internet-metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;background:transparent;border:0;box-shadow:none;padding:0}
@@ -82,3 +71,10 @@
  .internet-metric dt svg{width:23px;height:23px}
  .internet-result-actions .btn{font-size:.84rem;padding-inline:8px;gap:5px}
 }
+/* Keep the measurement and disclosure together with one set of metrics. */
+.internet-disclosure{max-width:59ch;margin:4px auto 0;text-align:center;color:#50586e;font-size:.875rem;line-height:1.5}
+.internet-disclosure a{color:#a72542;text-decoration:underline;text-underline-offset:2px}
+.internet-reading{min-height:2rem;align-items:center}
+.internet-pointer{transform-origin:140px 140px;transition:transform .24s ease}
+.internet-reading-source{text-align:center;color:#50586e;font-size:.875rem}
+@media(prefers-reduced-motion:reduce){.internet-pointer{transition:none}}

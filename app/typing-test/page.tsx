@@ -43,7 +43,7 @@ export default function TypingTestPage(){
     <div data-typing-extra=""><WorkspaceHeader title="Typing Speed Test"/></div>
     <section className="typing-test-section">
       <div className="container">
-        <p className="typing-test-lede" data-typing-extra="">Check your typing speed and accuracy. Pick a test, click the text and start typing: the timer begins with your first key. Free, no signup, and your results stay on your device.</p>
+        <p className="typing-test-lede" data-typing-extra="">Check your typing speed, WPM and accuracy.</p>
         <TypingTest/>
       </div>
     </section>
@@ -55,7 +55,7 @@ export default function TypingTestPage(){
             <h2>What is a typing speed test?</h2>
             <p>A typing speed test measures how quickly and how accurately you can type a piece of text. You type a prompt for a fixed time or until you reach the end, and the test turns your keystrokes into a speed in words per minute (WPM) and an accuracy percentage. Because every result uses the same rules, you can compare your scores over time and see whether your practice is working.</p>
 
-            <h2>How to test your typing speed</h2>
+            <h2>How It Works</h2>
             <ol>
               <li>Choose a mode: <strong>Time</strong> (15 seconds to 5 minutes), <strong>Words</strong> (10 to 100 words), <strong>Quote</strong> (a short, medium or long passage), <strong>Practice</strong> drills or your own <strong>Custom text</strong>.</li>
               <li>Click or tap the text. The timer does not start yet.</li>
@@ -64,10 +64,12 @@ export default function TypingTestPage(){
               <li>When the time runs out or you finish the text, read your results and the speed graph. Press <kbd>Esc</kbd> to try the same text again or <kbd>Ctrl</kbd>+<kbd>Enter</kbd> for a new one.</li>
             </ol>
 
-            <h2>What does WPM mean?</h2>
+            <details className="typing-scoring">
+            <summary>How scoring works</summary>
+            <h3>What does WPM mean?</h3>
             <p>WPM stands for words per minute. Real words have very different lengths, so typing tests use a standard word of <strong>5 characters</strong>, counting letters, numbers, punctuation and spaces alike. Typing “the cat sat” plus a space is 12 characters, or 2.4 standard words. This makes a result fair whether the text is full of short words or long ones.</p>
 
-            <h2>How WPM is calculated</h2>
+            <h3>How WPM is calculated</h3>
             <p>Editgoo uses the standard gross and net WPM formulas, with time measured by your browser’s high-resolution clock rather than by counting timer ticks:</p>
             <ul>
               <li><strong>Raw (gross) WPM</strong> = characters in your typed text ÷ 5 ÷ elapsed minutes.</li>
@@ -75,12 +77,13 @@ export default function TypingTestPage(){
             </ul>
             <p>Example: in a 60-second test you type 300 characters. That is 300 ÷ 5 ÷ 1 = <strong>60 raw WPM</strong>. If 10 of those characters are still wrong at the end, net WPM is 60 − 10 ÷ 1 = <strong>50 WPM</strong>. Backspace, Shift, arrow keys and other non-character keys are never counted as typed characters, and characters you delete are not part of your typed text.</p>
 
-            <h2>Gross vs net WPM</h2>
+            <h3>Gross vs net WPM</h3>
             <p>Gross (raw) WPM shows how fast your fingers move, mistakes included. Net WPM is the speed of usable text: each uncorrected mistake costs one word per minute. If your raw speed is much higher than your net speed, slowing down slightly and making fewer mistakes will usually raise your real score faster than trying to type quicker.</p>
 
-            <h2>How typing accuracy works</h2>
+            <h3>How typing accuracy works</h3>
             <p><strong>Accuracy</strong> is the share of characters in your final text that match the prompt. A mistake you correct no longer counts against it. <strong>Keystroke accuracy</strong> is stricter: it is the share of all character keys you pressed that were right the first time, so corrected mistakes still count. Your results also list corrected and uncorrected mistakes separately, so you can see whether you tend to fix errors or leave them behind.</p>
 
+            </details>
             <h2>Tips to improve typing speed</h2>
             <ul>
               <li>Keep your fingers on the home row (ASDF and JKL;) and return to it after each key.</li>

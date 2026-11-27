@@ -12,7 +12,6 @@ const operatedBy=businessName?`Editgoo (www.editgoo.com) is operated by ${busine
 const contactRoute=publicContact?`email ${publicContact} or use the contact form at www.editgoo.com/contact`:'use the contact form at www.editgoo.com/contact';
 
 export const catalogSections:Record<string,CatalogSection>={
-  'edit-pdf':{eyebrow:'EDITGOO / EDIT PDF',title:'Your PDF. A few thoughtful changes.',category:'Edit PDF',subtitle:'Add a watermark, fill supported forms, adjust pages or update metadata. Full text and image editing is available in the separate Edit PDF workspace.'},
   'convert-tools':{eyebrow:'EDITGOO / CONVERT',title:'A fresh format. A simpler task.',category:'Convert',subtitle:'Convert supported PDF, document and image formats. Each tool lists its limitations before you start.'},
   'pdf-tools':{eyebrow:'EDITGOO / PDF',title:'Every PDF task, simplified.',category:'PDF',subtitle:'Merge, split, rotate, compress and arrange PDF files in your browser.'},
   'document-tools':{eyebrow:'EDITGOO / DOCUMENTS',title:'Documents, your way.',category:'Document',subtitle:'Convert Word documents, spreadsheets, slides and text files.'},

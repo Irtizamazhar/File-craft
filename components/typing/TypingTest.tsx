@@ -139,10 +139,8 @@ const LiveStats=memo(function LiveStats({session,runKey,phase,wordTotal}:{sessio
   return <div className={styles.live} data-testid="live-stats">
     <dl className={styles.primaryStats}>
       <div><dt>WPM</dt><dd data-stat="wpm">{showSpeed&&stats?fmtWpm(stats.net):'–'}</dd></div>
-      <div><dt>Raw WPM</dt><dd data-stat="raw">{showSpeed&&stats?fmtWpm(stats.gross):'–'}</dd></div>
       <div><dt>Accuracy</dt><dd data-stat="accuracy">{fmtPct(stats?.accuracy??null)}</dd></div>
-      <div><dt>{timed?'Time left':'Time'}</dt><dd data-stat="time">{time}{timed?<small>s</small>:null}</dd></div>
-      <div><dt>Progress</dt><dd data-stat="progress">{Math.floor(progress)}<small>%</small></dd></div>
+      <div><dt>Time</dt><dd data-stat="time">{time}{timed?<small>s</small>:null}</dd></div>
     </dl>
     {wordTotal&&s?<p className={styles.wordCount}>{wordsDone(s.target,s.position)} of {wordTotal} words</p>:null}
     <div className={styles.progressTrack} aria-hidden="true"><span style={{transform:`scaleX(${progress/100})`}}/></div>
@@ -152,6 +150,8 @@ const LiveStats=memo(function LiveStats({session,runKey,phase,wordTotal}:{sessio
 const DetailStats=memo(function DetailStats({session,runKey,phase}:{session:MutableRefObject<TypingSession|null>;runKey:number;phase:string}){
   const stats=useLiveStats(session,runKey,phase);
   return <dl className={styles.detailStats} data-hide-in-focus="">
+    <div><dt>Raw WPM</dt><dd data-stat="raw">{stats&&stats.elapsedMs>=LIVE_WPM_MIN_MS?fmtWpm(stats.gross):'–'}</dd></div>
+    <div><dt>Progress</dt><dd data-stat="progress">{Math.floor(stats?.progress??0)}%</dd></div>
     <div><dt>Correct characters</dt><dd data-stat="correct">{stats?.correct??0}</dd></div>
     <div><dt>Incorrect characters</dt><dd data-stat="incorrect">{stats?.incorrect??0}</dd></div>
     <div><dt>Uncorrected mistakes</dt><dd data-stat="uncorrected">{stats?.uncorrected??0}</dd></div>
@@ -596,13 +596,16 @@ export default function TypingTest(){
         </div>}
         {mode==='practice'&&<label className={styles.select}><span>Practice</span>
           <select value={settings.drill} onChange={e=>applySettings({drill:e.target.value as Drill})}>{DRILLS.map(d=><option key={d.id} value={d.id}>{d.label}</option>)}</select></label>}
+      </div>
+      <details className={styles.optionDisclosure}>
+        <summary>Options</summary>
+        <div className={styles.advancedOptions}>
         {(mode==='time'||mode==='words')&&<>
           <label className={styles.select}><span>Difficulty</span>
             <select value={settings.difficulty} onChange={e=>applySettings({difficulty:e.target.value as Difficulty})}>{DIFFICULTIES.map(d=><option key={d.id} value={d.id}>{d.label}</option>)}</select></label>
           <label className={styles.toggle}><input type="checkbox" checked={settings.punctuation} onChange={e=>applySettings({punctuation:e.target.checked})}/><span>Punctuation</span></label>
           <label className={styles.toggle}><input type="checkbox" checked={settings.numbers} onChange={e=>applySettings({numbers:e.target.checked})}/><span>Numbers</span></label>
         </>}
-      </div>
       <div className={styles.prefs}>
         <label className={styles.select}><span>Text size</span>
           <select value={textSize} onChange={e=>{const v=e.target.value as TextSize;setTextSize(v);savePrefs({textSize:v})}}>{TEXT_SIZES.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></label>
@@ -610,6 +613,8 @@ export default function TypingTest(){
           {sound?<Volume2 size={17} aria-hidden="true"/>:<VolumeX size={17} aria-hidden="true"/>}Sound {sound?'on':'off'}</button>
         <button type="button" className={styles.iconToggle} aria-pressed={focusMode} onClick={()=>setFocusMode(true)}><Maximize2 size={17} aria-hidden="true"/>Focus mode</button>
       </div>
+        </div>
+      </details>
     </div>
 
     {mode==='custom'&&<div className={styles.customPanel} data-hide-in-focus="">
@@ -646,41 +651,54 @@ export default function TypingTest(){
             inputMode="text" enterKeyHint="done" data-gramm="false" data-lpignore="true" data-1p-ignore="" disabled={!chunks.length}
             onFocus={()=>setFocused(true)} onBlur={()=>setFocused(false)}/>
           {!focused&&chunks.length>0&&phase!=='finished'&&<div className={styles.focusHint} aria-hidden="true">
-            {phase==='running'?'Focus lost — the timer is still running. Click or tap here to keep typing.':'Click or tap here, then start typing. The timer starts with your first character.'}
+            {phase==='running'?'Timer running. Select here to keep typing.':<><span className={styles.mouseHint}>Click here and start typing</span><span className={styles.touchHint}>Tap here and start typing</span></>}
           </div>}
         </div>
         <p className={styles.srOnly}>Upcoming words: <span id="typing-upcoming" ref={upcomingRef}/></p>
         <p className={styles.notice} role="status" aria-live="polite">{notice}</p>
-        <DetailStats session={sessionRef} runKey={runKey} phase={phase}/>
+        <details className={styles.liveDetails} data-hide-in-focus=""><summary>Live details</summary><DetailStats session={sessionRef} runKey={runKey} phase={phase}/></details>
         <div className={styles.actions} data-hide-in-focus="">
           <button type="button" className={styles.ghostButton} onClick={()=>restart()} disabled={!chunks.length}><RotateCcw size={16} aria-hidden="true"/>Restart <kbd>Esc</kbd></button>
           <button type="button" className={styles.ghostButton} onClick={()=>newTest()} disabled={needsCustom}><Shuffle size={16} aria-hidden="true"/>New test <kbd>Ctrl</kbd><kbd>Enter</kbd></button>
-          <p id="typing-instructions" className={styles.instructions}>Type the text exactly as shown, including capitals, spaces and punctuation. Mistakes stay red until you fix them with Backspace. The clock never pauses once you start.</p>
+          <p id="typing-instructions" className={styles.srOnly}>Type the text exactly as shown, including capitals, spaces and punctuation. Mistakes stay red until you fix them with Backspace. The clock never pauses once you start.</p>
         </div>
       </div>
 
-      {r&&phase==='finished'&&<div className={styles.results} data-testid="results">
+      {r&&phase==='finished'&&<div className={styles.results} key={runKey} data-testid="results">
         <div className={styles.resultsHead}>
           <div>
-            <span className={styles.eyebrow}>{r.practice?'Practice result':'Test result'} · {r.label}</span>
-            <h2 ref={resultsHeadingRef} tabIndex={-1}>{fmtWpm(r.stats.net)} <small>WPM</small></h2>
+            <h2 ref={resultsHeadingRef} tabIndex={-1}><span data-result="net">{fmtWpm(r.stats.net)}</span> <small>WPM</small></h2>
             <p className={styles.resultStatus}>
-              {r.endReason==='time'?'Completed: time limit reached.':'Completed: every character typed.'}{' '}
-              {r.invalid?r.invalid:r.saved?(r.newBest?'New personal best saved on this device.':'Saved to your history on this device.'):!r.storage?'Not saved: this browser is blocking local storage.':'Not saved.'}
+              Test completed
             </p>
-            {r.practice&&<p className={styles.practiceNote}>Practice and custom-text results are for training. They do not count towards your personal best.</p>}
+            {r.invalid&&<p className={styles.practiceNote}>{r.invalid}</p>}
+            {!r.saved&&!r.invalid&&<p className={styles.practiceNote}>{r.storage?'Not saved.':'Not saved: local storage is unavailable.'}</p>}
+            {r.practice&&<p className={styles.practiceNote}>Practice result. Excluded from personal best.</p>}
+            <p className={styles.smallNote}>Raw WPM <strong>{fmtWpm(r.stats.gross)}</strong></p>
           </div>
-          {r.newBest&&<span className={styles.bestBadge}><Trophy size={18} aria-hidden="true"/>Personal best{r.previousBest?` (was ${fmtWpm(r.previousBest.wpm)})`:''}</span>}
+          {r.newBest&&<span className={styles.bestBadge}><Trophy size={18} aria-hidden="true"/>Personal best</span>}
         </div>
         <dl className={styles.resultPrimary}>
-          <div><dt>Net WPM</dt><dd data-result="net">{fmtWpm(r.stats.net)}</dd></div>
-          <div><dt>Raw WPM</dt><dd data-result="raw">{fmtWpm(r.stats.gross)}</dd></div>
           <div><dt>Accuracy</dt><dd data-result="accuracy">{fmtPct(r.stats.accuracy)}</dd></div>
+          <div><dt>Errors</dt><dd>{r.stats.uncorrected}<small>Uncorrected</small></dd></div>
           <div><dt>Duration</dt><dd data-result="duration">{formatDuration(r.stats.elapsedMs)}</dd></div>
+        </dl>
+        <div className={styles.resultActions}>
+          <button type="button" className={styles.primaryButton} onClick={()=>restart()}><RotateCcw size={17} aria-hidden="true"/>Try Again</button>
+          <button type="button" className={styles.ghostButton} onClick={()=>newTest()}><Shuffle size={16} aria-hidden="true"/>New Test</button>
+        </div>
+        <div className={styles.secondaryActions}>
+          <button type="button" onClick={changeMode}><SlidersHorizontal size={16} aria-hidden="true"/>Change Mode</button>
+          <button type="button" onClick={copyResults}>{copied==='done'?<Check size={16} aria-hidden="true"/>:<Copy size={16} aria-hidden="true"/>}{copied==='done'?'Copied':'Copy Results'}</button>
+          <span role="status" className={styles.copyStatus}>{copied==='done'?'Result summary copied to the clipboard.':copied==='failed'?'Copy failed. Select the summary below and copy it manually.':''}</span>
+        </div>
+        {copied==='failed'&&<textarea className={styles.copyFallback} readOnly value={resultSummary(r)} aria-label="Result summary" rows={8}/>}
+        <details className={styles.disclosure}>
+          <summary>Detailed Stats</summary>
+        <dl className={styles.resultSecondary}>
+          <div><dt>Raw WPM</dt><dd data-result="raw">{fmtWpm(r.stats.gross)}</dd></div>
           <div><dt>Correct characters</dt><dd data-result="correct">{r.stats.correct}</dd></div>
           <div><dt>Incorrect characters</dt><dd data-result="incorrect">{r.stats.incorrect}</dd></div>
-        </dl>
-        <dl className={styles.resultSecondary}>
           <div><dt>Keystroke accuracy</dt><dd data-result="keystroke-accuracy">{fmtPct(r.stats.keystrokeAccuracy)}</dd></div>
           <div><dt>Consistency</dt><dd data-result="consistency">{r.consistency===null?'Not enough data':Math.round(r.consistency)+'%'}</dd></div>
           <div><dt>Corrected mistakes</dt><dd data-result="corrected">{r.stats.corrected}</dd></div>
@@ -691,46 +709,40 @@ export default function TypingTest(){
         {r.consistency===null&&<p className={styles.smallNote}>Consistency needs at least 5 full seconds of typing, so it is not shown for this test.</p>}
         <h3 className={styles.chartTitle}>Speed over time</h3>
         <WpmChart samples={r.samples}/>
-        <div className={styles.resultActions}>
-          <button type="button" className={styles.primaryButton} onClick={()=>restart()}><RotateCcw size={17} aria-hidden="true"/>Try again</button>
-          <button type="button" className={styles.ghostButton} onClick={()=>newTest()}><Shuffle size={16} aria-hidden="true"/>New test</button>
-          <button type="button" className={styles.ghostButton} onClick={changeMode}><SlidersHorizontal size={16} aria-hidden="true"/>Change mode</button>
-          <button type="button" className={styles.ghostButton} onClick={copyResults}>{copied==='done'?<Check size={16} aria-hidden="true"/>:<Copy size={16} aria-hidden="true"/>}{copied==='done'?'Copied':'Copy results'}</button>
-          <span role="status" className={styles.copyStatus}>{copied==='done'?'Result summary copied to the clipboard.':copied==='failed'?'Copy failed. Select the summary below and copy it manually.':''}</span>
-        </div>
-        {copied==='failed'&&<textarea className={styles.copyFallback} readOnly value={resultSummary(r)} aria-label="Result summary" rows={8}/>}
-        <p className={styles.smallNote}>Results are calculated in your browser. They are not independently verified and are not a certification.</p>
+        </details>
       </div>}
     </section>
 
     <p className={styles.srOnly} role="status" aria-live="polite">{announcement}</p>
 
-    <section className={styles.progress} aria-labelledby="typing-progress-title" data-hide-in-focus="">
+    {!storageOk&&<p className={styles.storageWarning} role="note" data-hide-in-focus="">Saving is unavailable because this browser is blocking local storage. Your results still appear after each test.</p>}
+    {(history.length>0||best)&&<section className={styles.progress} aria-labelledby="typing-progress-title" data-hide-in-focus="">
       <div className={styles.progressHead}>
-        <h2 id="typing-progress-title">Your progress</h2>
-        <p>Saved only in this browser on this device. Nothing is uploaded and no account is needed.</p>
+        <h2 id="typing-progress-title">Progress</h2>
       </div>
-      {!storageOk&&<p className={styles.storageWarning} role="note">Saving is unavailable because this browser is blocking local storage (for example in a private window). Your results still appear after each test.</p>}
       <dl className={styles.progressStats}>
-        <div><dt>Personal best</dt><dd><span data-progress="best">{best?fmtWpm(best.wpm)+' WPM':'–'}</span>{best&&<small>{best.label}</small>}</dd></div>
+        <div><dt>Best WPM</dt><dd><span data-progress="best">{best?fmtWpm(best.wpm)+' WPM':'–'}</span>{best&&<small>{best.label}</small>}</dd></div>
         <div><dt>Average WPM</dt><dd data-progress="average">{summary.averageWpm===null?'–':fmtWpm(summary.averageWpm)}</dd></div>
         <div><dt>Average accuracy</dt><dd data-progress="accuracy">{fmtPct(summary.averageAccuracy)}</dd></div>
-        <div><dt>Saved sessions</dt><dd data-progress="sessions">{summary.sessions}</dd></div>
+        <div><dt>Sessions</dt><dd data-progress="sessions">{summary.sessions}</dd></div>
       </dl>
+      <details className={styles.disclosure}>
+      <summary>History</summary>
       {history.length>0?<div className={styles.tableScroll} tabIndex={0} role="region" aria-label="Recent tests"><table className={styles.historyTable}>
         <caption className={styles.srOnly}>Recent completed tests, newest first</caption>
         <thead><tr><th scope="col">Date</th><th scope="col">Test</th><th scope="col">WPM</th><th scope="col">Raw</th><th scope="col">Accuracy</th></tr></thead>
         <tbody>{history.slice(0,10).map(e=><tr key={e.id}>
-          <td>{new Date(e.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</td>
-          <td>{e.label}</td><td>{fmtWpm(e.wpm)}</td><td>{fmtWpm(e.raw)}</td><td>{fmtPct(e.accuracy)}</td>
+          <td><span className={styles.mobileCell}>Date</span>{new Date(e.at).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</td>
+          <td><span className={styles.mobileCell}>Test</span>{e.label}</td><td><span className={styles.mobileCell}>WPM</span>{fmtWpm(e.wpm)}</td><td><span className={styles.mobileCell}>Raw WPM</span>{fmtWpm(e.raw)}</td><td><span className={styles.mobileCell}>Accuracy</span>{fmtPct(e.accuracy)}</td>
         </tr>)}</tbody>
-      </table></div>:<p className={styles.smallNote}>Complete a test to start your history. Practice and custom-text results are saved too, but only standard tests can set a personal best.</p>}
+      </table></div>:<p className={styles.smallNote}>No saved sessions.</p>}
       <div className={styles.progressActions}>
         <ConfirmButton label="Clear history" confirm="Select again to clear history" disabled={!history.length||!storageOk}
           onConfirm={()=>{if(clearHistory(storageRef.current)){setHistory([]);setAnnouncement('History cleared.')}}}/>
         <ConfirmButton label="Reset personal best" confirm="Select again to reset" disabled={!best||!storageOk}
           onConfirm={()=>{if(resetBest(storageRef.current)){setBest(null);setAnnouncement('Personal best reset.')}}}/>
       </div>
-    </section>
+      </details>
+    </section>}
   </div>;
 }

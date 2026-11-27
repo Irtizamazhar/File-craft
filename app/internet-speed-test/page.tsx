@@ -15,7 +15,7 @@ const base=pageMetadata({title,description,path});
 export const metadata:Metadata={...base,title:{absolute:title+' | Editgoo'}};
 
 const faqs=[
-  ['What does this test measure?','The NDT7 download and upload tests measure application-level throughput in Mbps over a single connection to an M-Lab server. Results reflect the network path and conditions at the time of testing.'],
+  ['What does this test measure?','Each phase measures application-level throughput in Mbps over a single connection to an M-Lab server. Upload uses the server reading when available, or the browser?s sent-byte reading. Results reflect the network path and conditions at the time of testing.'],
   ['Where do ping and jitter come from?','Ping is the minimum TCP round-trip time reported by the M-Lab download server, in milliseconds. Jitter is unavailable because this integration does not provide an independent series of round-trip samples suitable for measuring jitter.'],
   ['How long does the test take?','Each transfer typically runs for about ten seconds. Discovery and connection setup can add time, and the test may use a substantial amount of data on fast connections.']
 ];
@@ -37,7 +37,7 @@ export default function InternetSpeedTestPage(){
       <nav aria-label="Breadcrumb" className="breadcrumb"><Link href="/">Home</Link><span aria-hidden="true">›</span><Link href="/tools?category=Utilities">Utilities</Link><span aria-hidden="true">›</span><span aria-current="page">Internet Speed Test</span></nav>
       <h1><span className="internet-heading-icon" aria-hidden="true"><Gauge/></span>Internet Speed Test</h1>
       <InternetSpeedTest url={url}/>
-      <div className="internet-instructions"><h2>How to test your connection</h2><p>Review the data notice, agree to the test and select Start Test. Keep this tab open while Editgoo measures download and then upload. Pause other large transfers if you want to measure an idle connection.</p></div>
+      <div className="internet-instructions"><h2>How to test your connection</h2><p>Review the data notice and select Start Test. Keep this tab open while Editgoo measures download and then upload. Pause other large transfers if you want to measure an idle connection.</p></div>
     </section>
     <Faq items={faqs}/>
   </>;

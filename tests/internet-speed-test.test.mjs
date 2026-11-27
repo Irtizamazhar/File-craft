@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const source=await readFile(new URL('../lib/speed-test/measurement.ts',import.meta.url),'utf8');
 const code=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText;
-const {mbps,pingMs,format,reduce,initial,active}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const {mbps,sampleMbps,pingMs,format,reduce,initial,active}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
 
 test('application bytes and elapsed seconds yield Mbps; TCP RTT converts microseconds to ms',()=>{
   assert.equal(mbps(12_500_000,1),100);
@@ -40,4 +40,11 @@ test('state machine prevents duplicate starts, preserves partial results and res
   assert.deepEqual(state.results,initial.results);
   assert.equal(reduce(state,{type:'cancel'}).phase,'cancelled');
   assert.equal(reduce(state,{type:'finish',date:'2026-11-27'}).phase,'completed');
+});
+
+test('NDT7 server microseconds and SDK client seconds remain distinct',()=>{
+  assert.equal(sampleMbps({NumBytes:12500000,ElapsedTime:1000000},'server'),100);
+  assert.equal(sampleMbps({NumBytes:12500000,ElapsedTime:1},'client'),100);
+  assert.equal(sampleMbps(undefined,'server'),null);
+  assert.equal(sampleMbps({NumBytes:12500000,ElapsedTime:0},'client'),null);
 });

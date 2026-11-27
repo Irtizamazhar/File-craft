@@ -37,10 +37,12 @@ test.describe('typing test',()=>{
       // 10 correct characters: 10 / 5 / minutes.
       await expect(result(page,'net')).toHaveText(String(Math.round(10/5/(seconds/60))));
       await expect(result(page,'accuracy')).toHaveText('100%');
-      await expect(page.getByText('Completed: time limit reached.')).toBeVisible();
+      await expect(page.getByText('Test completed',{exact:true})).toBeVisible();
       // The graph has one real sample per second; its last value equals the result.
+      await expect(page.getByText('Show graph data as a table')).toBeHidden();
+      await page.getByText('Detailed Stats',{exact:true}).click();
       await page.getByText('Show graph data as a table').click();
-      const rows=page.locator('details table tbody tr');
+      const rows=page.getByTestId('results').locator('table tbody tr');
       await expect(rows).toHaveCount(seconds);
       await expect(rows.last().locator('td').nth(1)).toHaveText(String(Math.round(10/5/(seconds/60))));
     });
@@ -88,7 +90,7 @@ test.describe('typing test',()=>{
     await input(page).focus();
     await page.keyboard.type(text,{delay:0});
     await expect(page.getByTestId('results')).toBeVisible();
-    await expect(page.getByText('Completed: every character typed.')).toBeVisible();
+    await expect(page.getByText('Test completed',{exact:true})).toBeVisible();
     await expect(result(page,'correct')).toHaveText(String(text.length));
     await expect(result(page,'uncorrected')).toHaveText('0');
     await expect(result(page,'incorrect')).toHaveText('0');
@@ -117,7 +119,9 @@ test.describe('typing test',()=>{
     await input(page).focus();
     await page.keyboard.type(text,{delay:0});
     await expect(page.getByTestId('results')).toBeVisible();
-    await expect(page.getByText(/Test result · Quote · short/i)).toBeVisible();
+    await expect(page.getByRole('button',{name:'Short',exact:true})).toHaveAttribute('aria-pressed','true');
+    await page.getByText('Detailed Stats',{exact:true}).click();
+    await expect(page.getByTestId('results').getByText('Quote',{exact:true})).toBeVisible();
   });
 
   test('custom text is validated and labelled as practice',async({page})=>{
@@ -133,8 +137,8 @@ test.describe('typing test',()=>{
     await expect.poll(()=>prompt(page)).toBe(text);
     await input(page).focus();
     await page.keyboard.type(text,{delay:5});
-    await expect(page.getByText(/Practice result · Custom text/)).toBeVisible();
-    await expect(page.getByText('Practice and custom-text results are for training.',{exact:false})).toBeVisible();
+    await expect(page.getByText(/Practice result[.] Excluded/)).toBeVisible();
+    await expect(page.getByTestId('results').getByText('Personal best',{exact:true})).toHaveCount(0);
   });
 
   test('practice drills produce matching text',async({page})=>{
@@ -218,7 +222,7 @@ test.describe('typing test',()=>{
     await page.keyboard.type(text.slice(0,20));
     await page.clock.fastForward(16000);
     await expect(result(page,'net')).toHaveText('16');
-    await expect(page.getByText('New personal best saved on this device.')).toBeVisible();
+    await expect(page.getByText('Personal best',{exact:true})).toBeVisible();
     await page.getByRole('button',{name:'Copy results'}).click();
     await expect(page.getByText('Result summary copied to the clipboard.')).toBeVisible();
     const copied=await page.evaluate(()=>navigator.clipboard.readText());
@@ -231,19 +235,22 @@ test.describe('typing test',()=>{
     await page.getByRole('button',{name:'Try again'}).click();
     await page.keyboard.type(text.slice(0,10));
     await page.clock.fastForward(16000);
-    await expect(page.getByText('Saved to your history on this device.')).toBeVisible();
+    await expect(page.getByText('Personal best',{exact:true})).toHaveCount(0);
     await expect(page.locator('[data-progress="best"]')).toHaveText('16 WPM');
     await expect(page.locator('[data-progress="sessions"]')).toHaveText('2');
     await expect(page.locator('[data-progress="average"]')).toHaveText('12');
     await page.reload();
     await expect(page.locator('[data-progress="sessions"]')).toHaveText('2');
+    await expect(page.getByRole('button',{name:'Clear history'})).toBeHidden();
+    await page.getByText('History',{exact:true}).click();
+    await expect(page.getByRole('table',{name:'Recent completed tests, newest first'})).toBeVisible();
     await page.getByRole('button',{name:'Clear history'}).click();
     await page.getByRole('button',{name:'Select again to clear history'}).click();
     await expect(page.locator('[data-progress="sessions"]')).toHaveText('0');
     await expect(page.locator('[data-progress="best"]')).toHaveText('16 WPM');
     await page.getByRole('button',{name:'Reset personal best'}).click();
     await page.getByRole('button',{name:'Select again to reset'}).click();
-    await expect(page.locator('[data-progress="best"]')).toHaveText('–');
+    await expect(page.getByRole('heading',{name:'Progress',exact:true})).toHaveCount(0);
   });
 
   test('works when local storage is blocked',async({page})=>{
@@ -254,7 +261,7 @@ test.describe('typing test',()=>{
     await input(page).focus();
     await page.keyboard.type('Storage can be blocked and the test still works.',{delay:60});
     await expect(page.getByTestId('results')).toBeVisible();
-    await expect(page.getByText('Not saved: this browser is blocking local storage.')).toBeVisible();
+    await expect(page.getByText('Not saved: local storage is unavailable.')).toBeVisible();
   });
 
   test('a test hidden in a background tab is marked and not saved',async({page})=>{
@@ -266,7 +273,7 @@ test.describe('typing test',()=>{
     await page.evaluate(()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>false});document.dispatchEvent(new Event('visibilitychange'))});
     await page.keyboard.type(' tabs keeps the clock running for this test.',{delay:5});
     await expect(page.getByText('The browser tab was hidden during the test, so this result was not saved.')).toBeVisible();
-    await expect(page.locator('[data-progress="sessions"]')).toHaveText('0');
+    await expect(page.getByRole('heading',{name:'Progress',exact:true})).toHaveCount(0);
   });
 
   test('IME composition text is scored once and replacements are rejected',async({page,browserName})=>{
@@ -338,6 +345,8 @@ test.describe('typing test',()=>{
 
   test('focus mode hides distractions and can be exited',async({page})=>{
     await open(page);
+    await expect(page.getByRole('button',{name:'Focus mode'})).toBeHidden();
+    await page.getByText('Options',{exact:true}).click();
     await page.getByRole('button',{name:'Focus mode'}).click();
     await expect(page.locator('.site-header')).toBeHidden();
     await expect(page.getByRole('group',{name:'Test mode'})).toBeHidden();
@@ -376,7 +385,9 @@ test.describe('typing test',()=>{
     const types=ld.flatMap(t=>[JSON.parse(t)].flat()).map((x:any)=>x['@type']);
     expect(types).toEqual(expect.arrayContaining(['WebApplication','BreadcrumbList']));
     expect(ld.join(' ')).not.toMatch(/aggregateRating|review/i);
-    for(const heading of ['What is a typing speed test?','How WPM is calculated','Gross vs net WPM','1-minute typing test','Frequently asked questions'])
+    await page.getByText('How scoring works',{exact:true}).click();
+    for(const heading of ['How WPM is calculated','Gross vs net WPM'])await expect(page.getByRole('heading',{level:3,name:heading})).toBeVisible();
+    for(const heading of ['What is a typing speed test?','How It Works','1-minute typing test','Frequently asked questions'])
       await expect(page.getByRole('heading',{level:2,name:heading})).toBeVisible();
     const image=await page.request.get('/og-typing-test.png');
     expect(image.status()).toBe(200);
@@ -402,4 +413,34 @@ test.describe('typing test',()=>{
     await cards.first().click();
     await expect(page).toHaveURL(/\/typing-test$/);
   });
+});
+
+test('compact disclosures and result cards stay within eight viewport widths',async({page})=>{
+  await page.clock.install();
+  await page.setViewportSize({width:390,height:844});
+  await open(page);
+  const fit=async()=>{
+    for(const width of [320,360,375,390,430,768,1024,1440]){
+      await page.setViewportSize({width,height:900});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),String(width)).toBe(true);
+    }
+  };
+  await fit();
+  await page.getByText('Options',{exact:true}).click();
+  await expect(page.getByLabel('Difficulty')).toBeVisible();
+  await expect(page.getByLabel('Text size')).toBeVisible();
+  await fit();
+  await page.getByText('Options',{exact:true}).click();
+  await page.getByRole('button',{name:'15s',exact:true}).click();
+  await input(page).focus();
+  await page.keyboard.type((await prompt(page)).slice(0,20));
+  await page.clock.fastForward(16000);
+  await expect(page.getByTestId('results')).toBeVisible();
+  await expect(page.getByText('Show graph data as a table')).toBeHidden();
+  await page.getByText('Detailed Stats',{exact:true}).click();
+  await page.getByText('History',{exact:true}).click();
+  await fit();
+  await page.setViewportSize({width:390,height:844});
+  const history=page.getByRole('region',{name:'Recent tests'});
+  expect(await history.evaluate(node=>node.scrollWidth<=node.clientWidth)).toBe(true);
 });

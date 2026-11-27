@@ -5,7 +5,7 @@ import {siteUrl,sitePublic} from '@/lib/site';
 const updated=new Date('2026-11-12');
 const advancedUpdated=new Date('2026-11-21');
 const contentUpdated=new Date('2026-11-25');
-const typingUpdated=new Date('2026-11-26');
+const typingUpdated=new Date('2026-11-27');
 const speedTestUpdated=new Date('2026-11-27');
 export default function sitemap():MetadataRoute.Sitemap {
   // Stays empty until the operator explicitly enables indexing (see sitePublic in lib/site.ts).

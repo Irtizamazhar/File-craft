@@ -4,8 +4,8 @@ import {ArrowDown,ArrowUp,Activity,Wifi,Share2,Play,RotateCcw} from 'lucide-reac
 import {active,format,initial,reduce,type MeasurementEvent} from '@/lib/speed-test/measurement';
 
 const statuses={
-  idle:'Ready to test',discovering:'Finding an M-Lab server…',downloading:'Measuring download…',
-  uploading:'Measuring upload…',completed:'Test completed',failed:'Test incomplete',cancelled:'Test cancelled'
+  idle:'Ready',discovering:'Connecting...',downloading:'Testing download...',
+  uploading:'Testing upload...',completed:'Test complete',failed:'Test incomplete',cancelled:'Test cancelled'
 };
 const metrics=[
   ['download','Download','Mbps',ArrowDown],['upload','Upload','Mbps',ArrowUp],
@@ -20,7 +20,7 @@ function Gauge({value}:{value:number|null}){
       <path d="M24 140 A116 116 0 0 1 256 140" pathLength="100" className="internet-track"/>
       <path d="M24 140 A116 116 0 0 1 256 140" pathLength="100" className="internet-fill"
         strokeDasharray={String(value===null?0:value/maximum*100)+' 100'}/>
-      <g transform={`rotate(${value===null?-90:-90+value/maximum*180} 140 140)`}>
+      <g className="internet-pointer" style={{transform: 'rotate('+(value===null?-90:-90+value/maximum*180)+'deg)'}}>
         <path className="internet-needle" d="M135 140 L140 43 L145 140 Z"/>
       </g>
       <circle cx="140" cy="140" r="9" fill="#e70028"/>
@@ -32,7 +32,6 @@ function Gauge({value}:{value:number|null}){
 
 export default function InternetSpeedTest({url}:{url:string}){
   const [state,dispatch]=useReducer(reduce,initial);
-  const [consent,setConsent]=useState(false);
   const [shareInfo,setShareInfo]=useState('');
   const [manualShare,setManualShare]=useState('');
   const current=useRef<Worker|null>(null);
@@ -65,7 +64,7 @@ export default function InternetSpeedTest({url}:{url:string}){
   }
 
   function start(){
-    if(!consent||current.current)return;
+    if(current.current)return;
     setShareInfo('');
     setManualShare('');
     dispatch({type:'start'});
@@ -81,7 +80,9 @@ export default function InternetSpeedTest({url}:{url:string}){
     try{
       const worker=new Worker(new URL('../../lib/speed-test/ndt.worker.ts',import.meta.url));
       current.current=worker;
-      deadline.current=window.setTimeout(()=>fail('The test timed out. Check your connection and try again.'),60000);
+      deadline.current=window.setTimeout(()=>{
+        if(current.current===worker)fail('The test timed out. Check your connection and try again.');
+      },60000);
       worker.onmessage=(event:MessageEvent<MeasurementEvent>)=>{
         if(current.current!==worker)return;
         dispatch(event.data);
@@ -90,7 +91,7 @@ export default function InternetSpeedTest({url}:{url:string}){
       worker.onerror=()=>{
         if(current.current===worker)fail('The test worker could not run. Try again or use another browser.');
       };
-      worker.postMessage({consent});
+      worker.postMessage({consent:true});
     }catch{
       fail('The test could not start in this browser.');
     }
@@ -101,7 +102,7 @@ export default function InternetSpeedTest({url}:{url:string}){
     const result=[
       'Editgoo Internet Speed Test',
       download===null?null:'Download: '+format(download)+' Mbps',
-      upload===null?null:'Upload: '+format(upload)+' Mbps',
+      upload===null?null:'Upload: '+format(upload)+' Mbps'+(state.uploadSource==='client'?' (browser measured)':''),
       ping===null?null:'Ping (M-Lab TCP minimum RTT): '+format(ping,1)+' ms',
       'Tested: '+new Date(state.date!).toISOString(),
       url
@@ -115,26 +116,29 @@ export default function InternetSpeedTest({url}:{url:string}){
     catch{setManualShare(result);setShareInfo('Select and copy the results below.');}
   }
 
+  const reading=busy?state.live:state.results.download??state.results.upload;
+  const disclosure=<p id="speed-privacy" className="internet-disclosure">
+    Uses internet data. Tests run through M-Lab, which collects your public IP and publishes measurement data.
+    Starting a test means you agree to this measurement. <a href="https://www.measurementlab.net/privacy/" target="_blank" rel="noopener noreferrer">M-Lab Privacy Policy</a>
+  </p>;
+
   return <div className="internet-tool">
     <div className="internet-panel">
     <div className="internet-measurement">
-      <Gauge value={busy?state.live:state.results.download??state.results.upload}/>
-      <div className="internet-reading"><strong>{format(busy?state.live:state.results.download??state.results.upload)}</strong><span>Mbps</span></div>
+      <Gauge value={reading}/>
+      <div className="internet-reading" data-testid="speed-live">
+        {reading!==null?<><strong>{format(reading)}</strong><span>Mbps</span></>:busy?
+          <progress aria-label="Waiting for a measurement"/>:<strong aria-hidden="true">&mdash;</strong>}
+      </div>
       <p role="status" className="internet-status">{statuses[state.phase]}</p>
-      {busy&&<progress aria-label={statuses[state.phase]}/>}
       <div className="internet-actions">{(!settled||busy)&&(
         busy?<button type="button" className="btn btn-outline" onClick={()=>{stop();dispatch({type:'cancel'})}}>Cancel test</button>:
-          <button type="button" className="btn btn-primary" disabled={!consent} aria-describedby="speed-privacy" onClick={start}>
+          <button type="button" className="btn btn-primary" aria-describedby="speed-privacy" onClick={start}>
             <Play size={19} aria-hidden="true"/> Start Test
           </button>)}
       </div>
+      {state.phase==='idle'&&disclosure}
     </div>
-    <ul className="internet-summary" aria-hidden="true">{metrics.map(([key,label,,Icon])=><li key={key}><span><Icon size={28}/></span>{label}</li>)}</ul>
-    </div>
-    <div className="internet-consent">
-      <p id="speed-privacy">The test transfers data and may use your mobile allowance. M-Lab collects measurement data, including your public IP address, and publishes test data. <a href="https://www.measurementlab.net/privacy/" target="_blank" rel="noopener noreferrer">M-Lab Privacy Policy</a></p>
-      <label><input type="checkbox" checked={consent} disabled={busy} aria-describedby="speed-privacy"
-        onChange={event=>setConsent(event.target.checked)}/> I agree to run the M-Lab test.</label>
     </div>
     <div className="internet-results">
       <dl className="internet-metrics">{metrics.map(([key,label,unit,Icon])=>{
@@ -145,11 +149,12 @@ export default function InternetSpeedTest({url}:{url:string}){
             {reading!==null&&<span>{unit}</span>}</dd>
         </div>;
       })}</dl>
-      <p className="internet-provider">Measurement provider <strong>Measurement Lab</strong></p>
+      {state.uploadSource==='client'&&<p className="internet-reading-source">Upload measured by your browser.</p>}
       {state.error&&<p role="alert" className="internet-error">{state.error}</p>}
-      {settled&&<div className="internet-result-actions"><button type="button" className="btn btn-primary" disabled={!consent} onClick={start}><RotateCcw size={18} aria-hidden="true"/>Test Again</button>{hasResults&&state.date&&<button type="button" className="btn btn-outline internet-share" onClick={share}>
+      {settled&&<div className="internet-result-actions"><button type="button" className="btn btn-primary" aria-describedby="speed-privacy" onClick={start}><RotateCcw size={18} aria-hidden="true"/>Test Again</button>{hasResults&&state.date&&<button type="button" className="btn btn-outline internet-share" onClick={share}>
         <Share2 size={17} aria-hidden="true"/>{typeof navigator!=='undefined'&&typeof navigator.share==='function'?'Share Result':'Copy Results'}
       </button>}</div>}
+      {settled&&disclosure}
       {shareInfo&&<p role="status">{shareInfo}</p>}
       {manualShare&&<textarea aria-label="Results to copy" readOnly value={manualShare} onFocus={event=>event.target.select()}/>}
     </div>

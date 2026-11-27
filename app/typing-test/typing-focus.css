@@ -12,3 +12,7 @@ html.typing-focus-mode .mobile-tool-nav-space,
 html.typing-focus-mode [data-typing-extra]{display:none!important}
 html.typing-focus-mode .typing-test-section{padding-top:20px;min-height:100vh;background:#fff}
 @media(max-width:540px){.typing-test-lede{display:none}.typing-test-section{padding-top:8px}}
+.typing-scoring{border:1px solid #e8dfe5;border-radius:12px;padding:0 14px;margin:18px 0}
+.typing-scoring summary{cursor:pointer;padding:12px 0;font-weight:750}
+.typing-scoring[open]{padding-bottom:12px}
+@media(max-width:540px){.typing-test-lede{display:block;margin-bottom:6px;font-size:14px}}

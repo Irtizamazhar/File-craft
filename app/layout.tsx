@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   // No twitter title/description here: they would override every page; X/Twitter falls back to each page's og: tags.
   twitter: {card:'summary_large_image',images:['/og-image.png']},
   icons: {icon:[{url:'/favicon-32.png',sizes:'32x32',type:'image/png'},{url:'/icon-192.png',sizes:'192x192',type:'image/png'}],apple:'/apple-touch-icon.png'},
+  other: {'google-adsense-account':'ca-pub-6568259874433864'},
   ...(googleVerification ? { verification: {google:googleVerification} } : {})
 };
 export default function RootLayout({children}:{children:React.ReactNode}) {

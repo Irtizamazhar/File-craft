@@ -36,3 +36,9 @@ body{background:#fff;font-family:Inter,'Segoe UI',Arial,sans-serif;color:var(--i
 
 @media(min-width:901px){.nav-dropdown-panel{max-height:calc(100dvh - 80px);overflow-y:auto}}
 @media(prefers-reduced-motion:reduce){.nav-dropdown>button svg{transition:none}}
+
+/* Keep policy links and long addresses inside the numbered article column. */
+@media (max-width: 540px) {
+  .privacy-policy article { overflow-wrap: anywhere; }
+  .privacy-policy .inline-link { display: inline; white-space: normal; }
+}
